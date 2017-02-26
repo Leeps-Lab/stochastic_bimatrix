@@ -1,0 +1,17 @@
+{% extends "global/Base.html" %}
+{% load staticfiles otree_tags %}
+
+{% block title %}
+    Your Choice
+{% endblock %}
+
+{% block content %}
+
+    <otree-stochastic-bimatrix
+        payoff-matrices='{{ Constants.payoff_grid_array }}'
+        period-length='{{ Constants.period_length }}'>
+    </otree-stochastic-bimatrix>
+
+    {% include 'stochastic_bimatrix/Instructions.html' %}
+
+{% endblock %}
