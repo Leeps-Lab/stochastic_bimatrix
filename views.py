@@ -54,29 +54,8 @@ class DecisionWaitPage(WaitPage):
         self.session.vars['start_time_{}'.format(self.group.id_in_subsession)] = start_time
         self.session.vars['end_time_{}'.format(self.group.id_in_subsession)] = end_time
 
-        # insert dummy decisions into database
-        # put a decision of -1 for each player at the start and end of the period
-        for player in self.group.get_players():
-            start_decision, end_decision = DecisionModel(), DecisionModel()
-
-            for d in start_decision, end_decision:
-                d.component = "otree-server"
-                d.session = self.session
-                d.subsession = self.subsession.name()
-                d.round = self.round_number
-                d.group = self.group.id_in_subsession
-                d.page = "Decision"
-                d.app = "continuous_bimatrix"
-                d.participant = player.participant
-                d.decision = {
-                    d.participant.code: -1
-                }
-
-            start_decision.timestamp = start_time
-            end_decision.timestamp = end_time
-
-            start_decision.save()
-            end_decision.save()
+        self.log_decision_bookends(
+            start_time, end_time, Constants.name_in_url, 'otree-bimatrix', -1)
 
 
 class Decision(Page):
