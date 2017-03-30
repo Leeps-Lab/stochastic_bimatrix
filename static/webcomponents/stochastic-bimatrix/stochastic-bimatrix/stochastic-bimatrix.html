@@ -1,0 +1,170 @@
+<link rel="import" href="/static/bower_components/polymer/polymer.html">
+
+<link rel="import" href="/static/otree-redwood/webcomponents/otree-constants/otree-constants.html">
+<link rel="import" href="/static/otree-redwood/webcomponents/otree-continuous-decision/otree-continuous-decision.html">
+
+<link rel="import" href="/static/webcomponents/stochastic-bimatrix/bimatrix-heatmap/bimatrix-heatmap.html">
+<link rel="import" href="/static/webcomponents/stochastic-bimatrix/otree-thermometer/otree-thermometer.html">
+<link rel="import" href="/static/webcomponents/stochastic-bimatrix/payoff-graph/payoff-graph.html">
+<link rel="import" href="/static/webcomponents/stochastic-bimatrix/strategy-graph/strategy-graph.html">
+
+<dom-module id="stochastic-bimatrix">
+    <template>
+        <style>
+            :host { margin: 10px; }
+
+            #slider {
+                writing-mode: bt-lr; /* IE */
+                -webkit-appearance: slider-vertical; /* WebKit */
+                width: 8px;
+                height: 310px;
+                margin: 25px 0 0 -30px;
+            }
+        </style>
+
+        <otree-constants id="constants"></otree-constants>
+        <otree-continuous-decision
+            component="stochastic-bimatrix"
+            group-decisions="{{ decisions }}">
+        </otree-continuous-decision>
+
+        <div style="height: 570px">
+            
+            <div style="float:left; padding-left: 40px">
+                <bimatrix-heatmap
+                    width='120'
+                    height='120'
+                    my-decision='[[other_decision]]'
+                    other-decision='[[my_decision]]'
+                    payoffs='[[other_payoffs_transpose]]'
+                    color='[[other_color]]'
+                ></bimatrix-heatmap>
+                <div style="float:left">
+                    <input id="slider" type="range" min="0" max="1" step=".01" value="[[my_decision]]" on-up="_setMyDecision" />
+                </div>
+                <div style="float:right">
+                    <bimatrix-heatmap
+                        class="heatmap"
+                        width='300'
+                        height='300'
+                        my-decision='[[my_decision]]'
+                        other-decision='[[other_decision]]'
+                        payoffs='[[my_payoffs]]'
+                        color='[[my_color]]'
+                    ></bimatrix-heatmap>
+                </div>
+            </div>
+
+            <div style="float:right">
+                <strategy-graph
+                    my-decision='[[my_decision]]'
+                    other-decision='[[other_decision]]'
+                    period-length='120'
+                ></strategy-graph>
+                <div style="float:left">
+                    <!--<otree-thermometer color='rainbow'></otree-thermometer>-->
+                </div>
+                <div style="float: right">
+                    <payoff-graph
+                        my-decision='[[my_decision]]'
+                        other-decision='[[other_decision]]'
+                        my-payoffs='[[my_payoffs]]'
+                        other-payoffs='[[other_payoffs]]'
+                        period-length='120'
+                    ></payoff-graph>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <script src="/static/general/color.js"></script>
+
+    <script>
+        Polymer({
+            is: 'stochastic-bimatrix',
+            properties: {
+                payoffMatrices: Array,
+                decisions: {
+                    type: Object,
+                    observer: '_decisionsChanged'
+                },
+                periodLength: Number
+            },
+            listeners: {
+                keyup: '_setMyDecision'
+            },
+            ready() {
+                // set payoff indices
+                if (this.$.constants.idInGroup == undefined) {
+                    console.log('Not in game, manually setting payoffIndex')
+                    this.payoffIndex = 0
+                } else {
+                    this.payoffIndex = this.$.constants.idInGroup - 1
+                }
+                this.otherPayoffIndex = 1 - this.payoffIndex
+
+                // variables for this player's decision and the opponent's decision
+                this.my_decision = .5
+                this.other_decision = .5
+
+                // color schemes for each player's heatmaps
+                this.my_color = 'rainbow'
+                this.other_color = 'mono'
+
+                this._calcPayoffs()
+            },
+            _calcPayoffs() {
+                // some function of decisions determines which payoff matrix will be used
+                if (this.my_decision == undefined)
+                    return
+                const matrix_index = Math.floor(this.my_decision * 3)
+                const payoffMatrix = this.payoffMatrices[matrix_index]
+
+                // separate each player's payoffs into two separate arrays
+                this.my_payoffs = payoffMatrix.map(val => parseInt(val[this.payoffIndex]))
+                this.other_payoffs = payoffMatrix.map(val => parseInt(val[this.otherPayoffIndex]))
+
+                // take inverse of other player's payoffs
+                const other_payoffs_transpose = this.other_payoffs.slice()
+                const tmp = other_payoffs_transpose[1]
+                other_payoffs_transpose[1] = other_payoffs_transpose[2]
+                other_payoffs_transpose[2] = tmp
+                this.other_payoffs_transpose = other_payoffs_transpose
+            },
+            // set my current decision. triggered by the player releasing the slider
+            _setMyDecision(event) {
+                if (event.type === 'keyup' && !(event.key === 'ArrowDown') && !(event.key === 'ArrowUp'))
+                    return
+
+                const d = parseFloat(event.target.value)
+                // if decisions hasn't been created yet, create it
+                this.decisions = this.decisions || {}
+                // pcode is this player's participant code
+                const pcode = this.$.constants.participantCode
+                // use polymer this.set to change decisions. I don't really know why I have to do this but it doesn't work if I don't
+                this.set('decisions.' + pcode, d)
+                this.my_decision = d
+            },
+            // listener on firebase decisions array. reacts to the opponent changing their strategy
+            _decisionsChanged() {
+                if (this.decisions === null)
+                    return
+
+                const pcode = this.$.constants.participantCode
+                // if I haven't set a decision yet, use my decision from firebase. here in case someone refreshes the page
+                if (this.decisions[pcode])
+                    this.my_decision = this.decisions[pcode]
+
+                // get other player's decision by picking the key that isn't yours
+                // there's probably a better way of doing this
+                for (let key in this.decisions) {
+                    if (key != pcode) {
+                        this.other_decision = this.decisions[key]
+                        break
+                    }
+                }
+                this._calcPayoffs()
+            }
+        })
+    </script>
+</dom-module>
