@@ -23,6 +23,7 @@
         </style>
 
         <otree-constants id="constants"></otree-constants>
+<<<<<<< HEAD:_static/webcomponents/app/stochastic-bimatrix/stochastic-bimatrix.html
         <otree-continuous-decision
             component="stochastic-bimatrix"
             group-decisions="{{ decisions }}">
@@ -57,9 +58,39 @@
 
             <div style="float:right">
                 <strategy-graph
+=======
+        <otree-log id="log"></otree-log>
+        <firebase-document
+            id="fbdoc"
+            path="[[path_]]"
+            data="{{ decisions }}">
+        </firebase-document>
+
+        <div style="padding-left: 40px; padding-right: 40px;">
+            <div style="height:50px;text-align:center;">
+                <span style="float:left">Your Payoffs</span>
+                <span>Payoff over time graph</span>
+                <span style="float:right">Opponent's Payoffs</span>
+            </div>
+            <div style="height: 250px">
+                <otree-heatmap
+                    style="float:left"
+                    width='150'
+                    height='150'
                     my-decision='[[my_decision]]'
                     other-decision='[[other_decision]]'
+                    payoffs='[[my_payoffs_B]]'
+                    color='gray'
+                ></otree-heatmap>
+                <otree-payoff-graph
+                    style="position:absolute;left:calc(50% - 275px);"
+>>>>>>> b75b8cbb004ed064758b4265b8d73523f709aacd:_static/webcomponents/smart/otree-stochastic-bimatrix/otree-stochastic-bimatrix.html
+                    my-decision='[[my_decision]]'
+                    other-decision='[[other_decision]]'
+                    my-payoffs='[[my_payoffs_A]]'
+                    other-payoffs='[[other_payoffs_A]]'
                     period-length='120'
+<<<<<<< HEAD:_static/webcomponents/app/stochastic-bimatrix/stochastic-bimatrix.html
                 ></strategy-graph>
                 <div style="float:left">
                     <!--<otree-thermometer color='rainbow'></otree-thermometer>-->
@@ -73,6 +104,43 @@
                         period-length='120'
                     ></payoff-graph>
                 </div>
+=======
+                ></otree-payoff-graph>
+                <otree-heatmap
+                    style="float:right"
+                    width='150'
+                    height='150'
+                    my-decision='[[my_decision]]'
+                    other-decision='[[other_decision]]'
+                    payoffs='[[other_payoffs_B]]'
+                    color='gray'
+                ></otree-heatmap>
+            </div>
+            <div style="height: 400px">
+                <input id="slider" style="float:left" type="range" min="0" max="1" step=".01" value="[[my_decision]]" on-up="_setMyDecision" />
+                <otree-heatmap
+                    style="float:left"
+                    width='300'
+                    height='300'
+                    my-decision='[[my_decision]]'
+                    other-decision='[[other_decision]]'
+                    payoffs='[[my_payoffs_A]]'
+                    color='[[my_color]]'
+                ></otree-heatmap>
+                <button
+                    style="position:relative;left:calc(50% - 300px - 80px);top:50px"
+                    on-click="_switchMatrix"
+                >Switch Payoff Matrices</button>
+                <otree-heatmap
+                    style="float:right"
+                    width='300'
+                    height='300'
+                    my-decision='[[my_decision]]'
+                    other-decision='[[other_decision]]'
+                    payoffs='[[other_payoffs_A]]'
+                    color='[[other_color]]'
+                ></otree-heatmap>
+>>>>>>> b75b8cbb004ed064758b4265b8d73523f709aacd:_static/webcomponents/smart/otree-stochastic-bimatrix/otree-stochastic-bimatrix.html
             </div>
         </div>
     </template>
@@ -94,6 +162,19 @@
                 keyup: '_setMyDecision'
             },
             ready() {
+<<<<<<< HEAD:_static/webcomponents/app/stochastic-bimatrix/stochastic-bimatrix.html
+=======
+                this.path_ = (
+                    '/session/' + this.$.constants.session +
+                    '/app/' + this.$.constants.appName +
+                    '/subsession/' + this.$.constants.subsession +
+                    '/round/' + this.$.constants.round +
+                    '/group/' + this.$.constants.group +
+                    '/component/otree-bimatrix' +
+                    '/decisions'
+                )
+
+>>>>>>> b75b8cbb004ed064758b4265b8d73523f709aacd:_static/webcomponents/smart/otree-stochastic-bimatrix/otree-stochastic-bimatrix.html
                 // set payoff indices
                 if (this.$.constants.idInGroup == undefined) {
                     console.log('Not in game, manually setting payoffIndex')
@@ -107,6 +188,9 @@
                 this.my_decision = .5
                 this.other_decision = .5
 
+                // variable for which matrix is in use
+                this.matrix_index = 1
+
                 // color schemes for each player's heatmaps
                 this.my_color = 'rainbow'
                 this.other_color = 'mono'
@@ -117,19 +201,14 @@
                 // some function of decisions determines which payoff matrix will be used
                 if (this.my_decision == undefined)
                     return
-                const matrix_index = Math.floor(this.my_decision * 3)
-                const payoffMatrix = this.payoffMatrices[matrix_index]
-
-                // separate each player's payoffs into two separate arrays
-                this.my_payoffs = payoffMatrix.map(val => parseInt(val[this.payoffIndex]))
-                this.other_payoffs = payoffMatrix.map(val => parseInt(val[this.otherPayoffIndex]))
-
-                // take inverse of other player's payoffs
-                const other_payoffs_transpose = this.other_payoffs.slice()
-                const tmp = other_payoffs_transpose[1]
-                other_payoffs_transpose[1] = other_payoffs_transpose[2]
-                other_payoffs_transpose[2] = tmp
-                this.other_payoffs_transpose = other_payoffs_transpose
+                // get two matrix indices
+                const index_A = this.matrix_index
+                const index_B = 1 - index_A
+                // get four payoff matrices
+                this.my_payoffs_A = this.payoffMatrices[index_A].map(val => parseInt(val[this.payoffIndex]))
+                this.other_payoffs_A = this.payoffMatrices[index_A].map(val => parseInt(val[this.otherPayoffIndex]))
+                this.my_payoffs_B = this.payoffMatrices[index_B].map(val => parseInt(val[this.payoffIndex]))
+                this.other_payoffs_B = this.payoffMatrices[index_B].map(val => parseInt(val[this.otherPayoffIndex]))
             },
             // set my current decision. triggered by the player releasing the slider
             _setMyDecision(event) {
@@ -163,6 +242,12 @@
                         break
                     }
                 }
+                this._calcPayoffs()
+            },
+            // handle switch-matrix button pressed
+            _switchMatrix(event) {
+                event.preventDefault()
+                this.matrix_index = 1 - this.matrix_index
                 this._calcPayoffs()
             }
         })
