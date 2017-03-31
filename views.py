@@ -4,7 +4,8 @@ from . import models
 from ._builtin import Page, WaitPage
 from otree.common import Currency as c, currency_range
 from .models import Constants
-from .models import Decision as DecisionModel
+from otree_redwood.models import Decision as DecisionModel
+import otree_redwood.abstract_views as redwood_views
 
 from django.utils import timezone
 from datetime import timedelta
@@ -43,7 +44,7 @@ class Introduction(Page):
     timeout_seconds = 100
 
 
-class DecisionWaitPage(WaitPage):
+class DecisionWaitPage(WaitPage, redwood_views.WaitPage):
     body_text = 'Waiting for all players to be ready'
 
     def after_all_players_arrive(self):
@@ -55,7 +56,7 @@ class DecisionWaitPage(WaitPage):
         self.session.vars['end_time_{}'.format(self.group.id_in_subsession)] = end_time
 
         self.log_decision_bookends(
-            start_time, end_time, Constants.name_in_url, 'otree-bimatrix', -1)
+            start_time, end_time, Constants.name_in_url, 'bimatrix', -1)
 
 
 class Decision(Page):
