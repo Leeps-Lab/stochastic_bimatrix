@@ -1,36 +1,32 @@
-{% extends "global/Instructions.html" %}
+{% load otree_tags staticfiles %}
 
-{% block instructions %}
+<p>
+    In this study, you will be randomly and anonymously paired with another participant.
+    Each of you simultaneously and privately chooses a strategy in the space from A to B,
+    using a slider, from "100% A" / "0% B" at the top slider position to "0% A" / "100% B"
+    at the bottom slider position.
+    Your payoffs will be determined by the choices of both as below:
+</p>
+<p><i>In each cell, the amount (in points) to the left is the payoff for you and to the right is the payoff for the other participant.</i></p>
 
-    <p>
-        In this study, you will be randomly and anonymously paired with another participant.
-        Each of you simultaneously and privately chooses a strategy in the space from A to B,
-        using a slider, from "100% A" / "0% B" at the top slider position to "0% A" / "100% B"
-        at the bottom slider position.
-        Your payoffs will be determined by the choices of both as below:
-    </p>
-    <p><i>In each cell, the amount (in points) to the left is the payoff for you and to the right is the payoff for the other participant.</i></p>
-
-    <table class='table table-bordered text-center' style='width: auto; margin: auto'>
-        <tr>
-            <th colspan=2 rowspan=2></th>
-            <th colspan=2>The Other Participant</th>
-        </tr>
-        <tr>
-            <th>A</th>
-            <th>B</th>
-        </tr>
-        <tr>
-            <th rowspan=2><span class=rotate90>You</span></th>
-            <th>A</th>
-            <td>{{ my_A_A_payoff }}, {{ other_A_A_payoff }}</td>
-            <td>{{ my_A_B_payoff }}, {{ other_A_B_payoff }}</td>
-        </tr>
-        <tr>
-            <th>B</th>
-            <td>{{ my_B_A_payoff }}, {{ other_B_A_payoff }}</td>
-            <td>{{ my_B_B_payoff }}, {{ other_B_B_payoff }}</td>
-        </tr>
-    </table>
-
-{% endblock %}
+<table class='table table-bordered text-center' style='width: auto; margin: auto'>
+    <tr>
+        <th colspan=2 rowspan=2></th>
+        <th colspan=2>The Other Participant</th>
+    </tr>
+    <tr>
+        <th>A</th>
+        <th>B</th>
+    </tr>
+    <tr>
+        <th rowspan=2><span class=rotate90>You</span></th>
+        <th>A</th>
+        <td>{{ Constants.my_A_A_payoff }}, {{ Constants.other_A_A_payoff }}</td>
+        <td>{{ Constants.my_A_B_payoff }}, {{ Constants.other_A_B_payoff }}</td>
+    </tr>
+    <tr>
+        <th>B</th>
+        <td>{{ Constants.my_B_A_payoff }}, {{ Constants.other_B_A_payoff }}</td>
+        <td>{{ Constants.my_B_B_payoff }}, {{ Constants.other_B_B_payoff }}</td>
+    </tr>
+</table>
