@@ -1,6 +1,6 @@
 <link rel="import" href="/static/bower_components/polymer/polymer.html">
 
-<link rel="import" href="/static/otree-redwood/webcomponents/otree-constants/otree-constants.html">
+<link rel="import" href="/static/otree-redwood/webcomponents/otree-vars/otree-vars.html">
 <link rel="import" href="/static/otree-redwood/webcomponents/otree-continuous-decision/otree-continuous-decision.html">
 
 <link rel="import" href="/static/webcomponents/stochastic-bimatrix/bimatrix-heatmap/bimatrix-heatmap.html">
@@ -14,53 +14,30 @@
         <style>
             :host { margin: 10px; }
 
+            .main-heatmap {
+                width: 300px;
+                height: 300px;
+            }
+
+            .other-heatmap {
+                width: 120px;
+                height: 120px;
+            }
+
             #slider {
                 writing-mode: bt-lr; /* IE */
                 -webkit-appearance: slider-vertical; /* WebKit */
                 width: 8px;
                 height: 310px;
             }
+
         </style>
 
-        <otree-constants id="constants"></otree-constants>
+        <otree-vars id="vars"></otree-vars>
         <otree-continuous-decision
             component="stochastic-bimatrix"
             group-decisions="{{ decisions }}">
         </otree-continuous-decision>
-
-        <div style="height: 570px">
-            
-            <div style="float:left; padding-left: 40px">
-                <bimatrix-heatmap
-                    width='120'
-                    height='120'
-                    my-decision='[[other_decision]]'
-                    other-decision='[[my_decision]]'
-                    payoffs='[[other_payoffs_transpose]]'
-                    color='[[other_color]]'
-                ></bimatrix-heatmap>
-                <div style="float:left">
-                    <input id="slider" type="range" min="0" max="1" step=".01" value="[[my_decision]]" on-up="_setMyDecision" />
-                </div>
-                <div style="float:right">
-                    <bimatrix-heatmap
-                        class="heatmap"
-                        width='300'
-                        height='300'
-                        my-decision='[[my_decision]]'
-                        other-decision='[[other_decision]]'
-                        payoffs='[[my_payoffs]]'
-                        color='[[my_color]]'
-                    ></bimatrix-heatmap>
-                </div>
-            </div>
-
-        <otree-log id="log"></otree-log>
-        <firebase-document
-            id="fbdoc"
-            path="[[path_]]"
-            data="{{ decisions }}">
-        </firebase-document>
 
         <div>
             <div style="height: 250px; margin-bottom:30px">
@@ -69,29 +46,27 @@
                         Switch
                     </div>
                     <div style="display:inline-block;margin-right:20px">
-                        <otree-heatmap
+                        <bimatrix-heatmap
                             id="heatmap-P1-B"
-                            width='150'
-                            height='150'
+                            class="other-heatmap"
                             my-decision='[[my_decision]]'
                             other-decision='[[other_decision]]'
                             payoffs='[[my_payoffs_B]]'
                             color='gray'
-                        ></otree-heatmap>
+                        ></bimatrix-heatmap>
                     </div>
                     <div style="display:inline-block">
-                        <otree-hazard-bar hazard=".9"></otree-hazard-bar>
+                        <hazard-bar hazard=".9"></hazard-bar>
                     </div>
                     <div style="display:inline-block;margin-left:20px">
-                        <otree-heatmap
+                        <bimatrix-heatmap
                             id="heatmap-P2-B"
-                            width='150'
-                            height='150'
+                            class="other-heatmap"
                             my-decision='[[my_decision]]'
                             other-decision='[[other_decision]]'
                             payoffs='[[other_payoffs_B]]'
                             color='gray'
-                        ></otree-heatmap>
+                        ></bimatrix-heatmap>
                     </div>
                 </div>
                 <div style="float:right">
@@ -101,29 +76,28 @@
                         </div>
                     </div>
                     <div style="display:inline-block">
-                        <otree-payoff-graph
+                        <payoff-graph
                             id="heatmap-P1-A"
                             my-decision='[[my_decision]]'
                             other-decision='[[other_decision]]'
                             my-payoffs='[[my_payoffs_A]]'
                             other-payoffs='[[other_payoffs_A]]'
                             period-length='120'
-                        ></otree-payoff-graph>
+                        ></payoff-graph>
                     </div>
                 </div>
             </div>
             <div style="height: 400px">
                 <div style="float:left">
                     <div style="display:inline-block">
-                        <otree-heatmap
+                        <bimatrix-heatmap
                             id="heatmap-P2-A"
-                            width='300'
-                            height='300'
+                            class="main-heatmap"
                             my-decision='[[my_decision]]'
                             other-decision='[[other_decision]]'
                             payoffs='[[my_payoffs_A]]'
                             color='[[my_color]]'
-                        ></otree-heatmap>
+                        ></bimatrix-heatmap>
                         <div style="margin-top:10px; text-align:center">Your Payoff</div>
                     </div>
                     <div style="display:inline-block; margin-left:20px; margin-right:20px">
@@ -132,14 +106,14 @@
                         </div>
                     </div>
                     <div style="display:inline-block">
-                        <otree-heatmap
-                            width='300'
-                            height='300'
+                        <bimatrix-heatmap
+                            id="heatmap-P1-A"
+                            class="main-heatmap"
                             my-decision='[[my_decision]]'
                             other-decision='[[other_decision]]'
                             payoffs='[[other_payoffs_A]]'
                             color='[[other_color]]'
-                        ></otree-heatmap>
+                        ></bimatrix-heatmap>
                         <div style="margin-top:10px; text-align:center">Other Player</div>
                     </div>
                 </div>
