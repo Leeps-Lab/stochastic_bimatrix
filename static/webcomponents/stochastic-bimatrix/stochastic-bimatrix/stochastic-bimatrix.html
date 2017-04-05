@@ -26,7 +26,8 @@
         <otree-constants id="constants"></otree-constants>
         <otree-continuous-decision
             component="stochastic-bimatrix"
-            group-decisions="{{ decisions }}">
+            my-decision="{{ myDecision }}"
+            other-decision="{{ otherDecision }}">
         </otree-continuous-decision>
 
         <div>
@@ -132,7 +133,7 @@
                 payoffMatrices: Array,
                 myDecision: Number,
                 otherDecision: Number,
-                periodLength: Number
+                periodLength: Number,
             },
             ready() {
                 // set payoff indices
@@ -167,42 +168,22 @@
                 this.otherPayoffs_B = this.payoffMatrices[index_B].map(
                     val => parseInt(val[this.otherPayoffIndex]));
             },
-            // listener on firebase decisions array. reacts to the opponent changing their strategy
-            _decisionsChanged() {
-                if (this.decisions === null)
-                    return;
-
-                const pcode = this.$.constants.participantCode;
-                // if I haven't set a decision yet, use my decision from firebase. here in case someone refreshes the page
-                if (this.decisions[pcode])
-                    this.myDecision = this.decisions[pcode];
-
-                // get other player's decision by picking the key that isn't yours
-                // there's probably a better way of doing this
-                for (let key in this.decisions) {
-                    if (key != pcode) {
-                        this.otherDecision = this.decisions[key];
-                        break;
-                    }
-                }
-                this._calcPayoffs();
-            },
             // handle switch-matrix button pressed
             _switchMatrix(event) {
                 event.preventDefault();
 
                 // get heatmaps
-                const
-                    P1A = $('#heatmap-P1-A'),
-                    P2A = $('#heatmap-P2-A'),
-                    P1B = $('#heatmap-P1-B'),
-                    P2B = $('#heatmap-P2-B');
+                // const
+                //     P1A = $('#heatmap-P1-A'),
+                //     P2A = $('#heatmap-P2-A'),
+                //     P1B = $('#heatmap-P1-B'),
+                //     P2B = $('#heatmap-P2-B');
                 // do animation
-                P1A.animate({ left: P1B.offset().left, top: P1B.offset().top });
+                // P1A.animate({ left: P1B.offset().left, top: P1B.offset().top });
 
                 // change payoff functions
-                // this.matrix_index = 1 - this.matrix_index
-                // this._calcPayoffs()
+                this.matrix_index = 1 - this.matrix_index;
+                this._calcPayoffs();
             }
         })
     </script>
