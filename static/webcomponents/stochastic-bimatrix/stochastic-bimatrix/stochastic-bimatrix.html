@@ -1,28 +1,18 @@
 <link rel="import" href="/static/bower_components/polymer/polymer.html">
 
-<link rel="import" href="/static/otree-redwood/webcomponents/otree-vars/otree-vars.html">
+<link rel="import" href="/static/otree-redwood/webcomponents/otree-constants/otree-constants.html">
 <link rel="import" href="/static/otree-redwood/webcomponents/otree-continuous-decision/otree-continuous-decision.html">
 
 <link rel="import" href="/static/webcomponents/stochastic-bimatrix/bimatrix-heatmap/bimatrix-heatmap.html">
 <link rel="import" href="/static/webcomponents/stochastic-bimatrix/otree-thermometer/otree-thermometer.html">
-<link rel="import" href="/static/webcomponents/stochastic-bimatrix/otree-hazard-bar/otree-hazard-bar.html">
-<link rel="import" href="/static/webcomponents/stochastic-bimatrix/otree-payoff-graph/otree-payoff-graph.html">
-<link rel="import" href="/static/webcomponents/stochastic-bimatrix/otree-strategy-graph/otree-strategy-graph.html">
+<link rel="import" href="/static/webcomponents/stochastic-bimatrix/hazard-bar/hazard-bar.html">
+<link rel="import" href="/static/webcomponents/stochastic-bimatrix/payoff-graph/payoff-graph.html">
+<link rel="import" href="/static/webcomponents/stochastic-bimatrix/strategy-graph/strategy-graph.html">
 
 <dom-module id="stochastic-bimatrix">
     <template>
         <style>
             :host { margin: 10px; }
-
-            .main-heatmap {
-                width: 300px;
-                height: 300px;
-            }
-
-            .other-heatmap {
-                width: 120px;
-                height: 120px;
-            }
 
             #slider {
                 writing-mode: bt-lr; /* IE */
@@ -33,7 +23,7 @@
 
         </style>
 
-        <otree-vars id="vars"></otree-vars>
+        <otree-constants id="constants"></otree-constants>
         <otree-continuous-decision
             component="stochastic-bimatrix"
             group-decisions="{{ decisions }}">
@@ -48,10 +38,10 @@
                     <div style="display:inline-block;margin-right:20px">
                         <bimatrix-heatmap
                             id="heatmap-P1-B"
-                            class="other-heatmap"
-                            my-decision='[[my_decision]]'
-                            other-decision='[[other_decision]]'
-                            payoffs='[[my_payoffs_B]]'
+                            size="120"
+                            my-decision='[[ myDecision ]]'
+                            other-decision='[[ otherDecision ]]'
+                            payoffs='[[ myPayoffs_B ]]'
                             color='gray'
                         ></bimatrix-heatmap>
                     </div>
@@ -61,10 +51,10 @@
                     <div style="display:inline-block;margin-left:20px">
                         <bimatrix-heatmap
                             id="heatmap-P2-B"
-                            class="other-heatmap"
-                            my-decision='[[my_decision]]'
-                            other-decision='[[other_decision]]'
-                            payoffs='[[other_payoffs_B]]'
+                            size="120"
+                            my-decision='[[ myDecision ]]'
+                            other-decision='[[ otherDecision ]]'
+                            payoffs='[[ otherPayoffs_B ]]'
                             color='gray'
                         ></bimatrix-heatmap>
                     </div>
@@ -77,11 +67,11 @@
                     </div>
                     <div style="display:inline-block">
                         <payoff-graph
-                            id="heatmap-P1-A"
-                            my-decision='[[my_decision]]'
-                            other-decision='[[other_decision]]'
-                            my-payoffs='[[my_payoffs_A]]'
-                            other-payoffs='[[other_payoffs_A]]'
+                            style="height: 250px"
+                            my-decision='[[ myDecision ]]'
+                            other-decision='[[ otherDecision ]]'
+                            my-payoffs='[[ myPayoffs_A ]]'
+                            other-payoffs='[[ otherPayoffs_A ]]'
                             period-length='120'
                         ></payoff-graph>
                     </div>
@@ -92,27 +82,33 @@
                     <div style="display:inline-block">
                         <bimatrix-heatmap
                             id="heatmap-P2-A"
-                            class="main-heatmap"
-                            my-decision='[[my_decision]]'
-                            other-decision='[[other_decision]]'
-                            payoffs='[[my_payoffs_A]]'
-                            color='[[my_color]]'
+                            size="300"
+                            my-decision='[[ myDecision ]]'
+                            other-decision='[[ otherDecision ]]'
+                            payoffs='[[ myPayoffs_A ]]'
+                            color='[[ myColor ]]'
                         ></bimatrix-heatmap>
                         <div style="margin-top:10px; text-align:center">Your Payoff</div>
                     </div>
                     <div style="display:inline-block; margin-left:20px; margin-right:20px">
                         <div style="position:relative; bottom:20px">
-                            <input id="slider" type="range" min="0" max="1" step=".01" value="[[my_decision]]" on-up="_setMyDecision" />
+                            <input
+                                id="slider"
+                                type="range"
+                                min="0"
+                                max="1"
+                                step=".01"
+                                value="{{ myDecision::input }}">
                         </div>
                     </div>
                     <div style="display:inline-block">
                         <bimatrix-heatmap
                             id="heatmap-P1-A"
-                            class="main-heatmap"
-                            my-decision='[[my_decision]]'
-                            other-decision='[[other_decision]]'
-                            payoffs='[[other_payoffs_A]]'
-                            color='[[other_color]]'
+                            size="300"
+                            my-decision='[[ myDecision ]]'
+                            other-decision='[[ otherDecision ]]'
+                            payoffs='[[ otherPayoffs_A ]]'
+                            color='[[ otherColor ]]'
                         ></bimatrix-heatmap>
                         <div style="margin-top:10px; text-align:center">Other Player</div>
                     </div>
@@ -134,107 +130,75 @@
             is: 'stochastic-bimatrix',
             properties: {
                 payoffMatrices: Array,
-                decisions: {
-                    type: Object,
-                    observer: '_decisionsChanged'
-                },
+                myDecision: Number,
+                otherDecision: Number,
                 periodLength: Number
             },
-            listeners: {
-                keyup: '_setMyDecision'
-            },
             ready() {
-                this.path_ = (
-                    '/session/' + this.$.constants.session +
-                    '/app/' + this.$.constants.appName +
-                    '/subsession/' + this.$.constants.subsession +
-                    '/round/' + this.$.constants.round +
-                    '/group/' + this.$.constants.group +
-                    '/component/otree-bimatrix' +
-                    '/decisions'
-                )
-
                 // set payoff indices
                 if (this.$.constants.idInGroup == undefined) {
-                    console.log('Not in game, manually setting payoffIndex')
-                    this.payoffIndex = 0
+                    console.log('Not in game, manually setting payoffIndex');
+                    this.payoffIndex = 0;
                 } else {
-                    this.payoffIndex = this.$.constants.idInGroup - 1
+                    this.payoffIndex = this.$.constants.idInGroup - 1;
                 }
                 this.otherPayoffIndex = 1 - this.payoffIndex
 
-                // variables for this player's decision and the opponent's decision
-                this.my_decision = .5
-                this.other_decision = .5
-
                 // variable for which matrix is in use
-                this.matrix_index = 1
+                this.matrix_index = 1;
 
                 // color schemes for each player's heatmaps
-                this.my_color = 'rainbow'
-                this.other_color = 'mono'
+                this.myColor = 'rainbow';
+                this.otherColor = 'mono';
 
-                this._calcPayoffs()
+                this._calcPayoffs();
             },
             _calcPayoffs() {
-                // some function of decisions determines which payoff matrix will be used
-                if (this.my_decision == undefined)
-                    return
                 // get two matrix indices
-                const index_A = this.matrix_index
-                const index_B = 1 - index_A
+                const index_A = this.matrix_index;
+                const index_B = 1 - index_A;
                 // get four payoff matrices
-                this.my_payoffs_A = this.payoffMatrices[index_A].map(val => parseInt(val[this.payoffIndex]))
-                this.other_payoffs_A = this.payoffMatrices[index_A].map(val => parseInt(val[this.otherPayoffIndex]))
-                this.my_payoffs_B = this.payoffMatrices[index_B].map(val => parseInt(val[this.payoffIndex]))
-                this.other_payoffs_B = this.payoffMatrices[index_B].map(val => parseInt(val[this.otherPayoffIndex]))
-            },
-            // set my current decision. triggered by the player releasing the slider
-            _setMyDecision(event) {
-                if (event.type === 'keyup' && !(event.key === 'ArrowDown') && !(event.key === 'ArrowUp'))
-                    return
-
-                const d = parseFloat(event.target.value)
-                // if decisions hasn't been created yet, create it
-                this.decisions = this.decisions || {}
-                // pcode is this player's participant code
-                const pcode = this.$.constants.participantCode
-                // use polymer this.set to change decisions. I don't really know why I have to do this but it doesn't work if I don't
-                this.set('decisions.' + pcode, d)
-                this.my_decision = d
+                this.myPayoffs_A = this.payoffMatrices[index_A].map(
+                    val => parseInt(val[this.payoffIndex]));
+                this.otherPayoffs_A = this.payoffMatrices[index_A].map(
+                    val => parseInt(val[this.otherPayoffIndex]));
+                this.myPayoffs_B = this.payoffMatrices[index_B].map(
+                    val => parseInt(val[this.payoffIndex]));
+                this.otherPayoffs_B = this.payoffMatrices[index_B].map(
+                    val => parseInt(val[this.otherPayoffIndex]));
             },
             // listener on firebase decisions array. reacts to the opponent changing their strategy
             _decisionsChanged() {
                 if (this.decisions === null)
-                    return
+                    return;
 
-                const pcode = this.$.constants.participantCode
+                const pcode = this.$.constants.participantCode;
                 // if I haven't set a decision yet, use my decision from firebase. here in case someone refreshes the page
                 if (this.decisions[pcode])
-                    this.my_decision = this.decisions[pcode]
+                    this.myDecision = this.decisions[pcode];
 
                 // get other player's decision by picking the key that isn't yours
                 // there's probably a better way of doing this
                 for (let key in this.decisions) {
                     if (key != pcode) {
-                        this.other_decision = this.decisions[key]
-                        break
+                        this.otherDecision = this.decisions[key];
+                        break;
                     }
                 }
-                this._calcPayoffs()
+                this._calcPayoffs();
             },
             // handle switch-matrix button pressed
             _switchMatrix(event) {
-                event.preventDefault()
+                event.preventDefault();
 
                 // get heatmaps
                 const
                     P1A = $('#heatmap-P1-A'),
                     P2A = $('#heatmap-P2-A'),
                     P1B = $('#heatmap-P1-B'),
-                    P2B = $('#heatmap-P2-B')
+                    P2B = $('#heatmap-P2-B');
                 // do animation
-                P1A.animate({ left: P1B.offset().left, top: P1B.offset().top })
+                P1A.animate({ left: P1B.offset().left, top: P1B.offset().top });
 
                 // change payoff functions
                 // this.matrix_index = 1 - this.matrix_index

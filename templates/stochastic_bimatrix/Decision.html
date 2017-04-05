@@ -1,22 +1,41 @@
-{% extends "global/FirebaseAppBase.html" %}
+{% extends "global/Page.html" %}
 {% load staticfiles otree_tags %}
 
 {% block title %}
     Your Choice
 {% endblock %}
 
-{% block local_scripts %}
-  <link
-      rel="import"
-      href="/static/webcomponents/smart/otree-stochastic-bimatrix/otree-stochastic-bimatrix.html">
- {% endblock %}
+{% block scripts %}
+    <script>
+     	var oTree = oTree || {};
+       (function() {
+         oTree.session = "{{ session.code }}";
+         oTree.subsession = parseInt("{{ subsession.id }}");
+         oTree.subsession = isNaN(oTree.subsession) ? null : oTree.subsession;
+         oTree.round = parseInt("{{ player.round_number }}");
+         oTree.round = isNaN(oTree.round) ? null : oTree.round;
+         oTree.group = parseInt("{{ player.group.id_in_subsession }}");
+         oTree.group = isNaN(oTree.group) ? null : oTree.group;
+         oTree.role = "{{ player.role }}";
+         oTree.participantCode = "{{ player.participant.code }}";
+         oTree.appName = "{{ subsession.app_name }}";
+         oTree.idInGroup = "{{ player.id_in_group }}";
+       })();
+     </script>
+
+    <script src="//code.highcharts.com/highcharts.js"></script>
+
+    <link
+    		rel="import"
+    		href="{% static "webcomponents/stochastic-bimatrix/stochastic-bimatrix/stochastic-bimatrix.html" %}">
+
+{% endblock %}
 
 {% block content %}
-
-    <otree-stochastic-bimatrix
+    <stochastic-bimatrix
         payoff-matrices='{{ Constants.payoff_grid_array }}'
         period-length='{{ Constants.period_length }}'>
-    </otree-stochastic-bimatrix>
+    </stochastic-bimatrix>
 
     {% include 'stochastic_bimatrix/Instructions.html' %}
 
