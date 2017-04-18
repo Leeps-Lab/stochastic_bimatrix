@@ -48,7 +48,7 @@ class DecisionWaitPage(WaitPage):
     body_text = 'Waiting for all players to be ready'
 
 
-class Decision(Page, redwood_views.PageMixin):
+class Decision(redwood_views.Page):
     timeout_seconds = Constants.period_length + 10
 
     def when_all_players_ready(self):
