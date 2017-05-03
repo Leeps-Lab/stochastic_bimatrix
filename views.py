@@ -4,12 +4,13 @@ from . import models
 from ._builtin import Page, WaitPage
 from otree.common import Currency as c, currency_range
 from .models import Constants
-from otree_redwood.models import Decision as DecisionModel
 import otree_redwood.abstract_views as redwood_views
+from otree_redwood import consumers
 
 from django.utils import timezone
 from datetime import timedelta
 import logging
+import time
 
 
 def vars_for_all_templates(self):
@@ -48,20 +49,26 @@ class DecisionWaitPage(WaitPage):
     body_text = 'Waiting for all players to be ready'
 
 
-class Decision(redwood_views.Page):
-    timeout_seconds = Constants.period_length + 10
+class Decision(redwood_views.ContinuousDecisionPage):
+    period_length = Constants.period_length
 
     def when_all_players_ready(self):
+        super().when_all_players_ready()
         # calculate start and end times for the period
         start_time = timezone.now()
         end_time = start_time + timedelta(seconds=Constants.period_length)
 
         self.session.vars['start_time_{}'.format(self.group.id_in_subsession)] = start_time
         self.session.vars['end_time_{}'.format(self.group.id_in_subsession)] = end_time
+        self.emitter = redwood_views.DiscreteEventEmitter(0.1, self.period_length, self.group, self.tick)
+        self.emitter.start()
 
-        self.log_decision_bookends(
-            start_time, end_time, Constants.name_in_url, 'bimatrix', -1)
-        self.start_period_timer(Constants.period_length)
+    def tick(self, current_interval, intervals, group):
+        consumers.send(self.group, 'tick', {
+            'current_interval': current_interval,
+            'intervals': intervals,
+            'timestamp': time.time()
+        })
 
 
 class Results(Page):
@@ -77,7 +84,7 @@ class Results(Page):
 
 page_sequence = [
     Introduction,
-    # DecisionWaitPage,
+    DecisionWaitPage,
     Decision,
-    # Results
+    Results
 ]

@@ -8,7 +8,7 @@ from otree.constants import BaseConstants
 from otree.common import Currency as c, currency_range
 from otree.models import BaseSubsession, BaseGroup, BasePlayer
 
-from otree_redwood.models import Decision
+from otree_redwood.models import Event
 
 doc = """
 Two-by-two game with stochastic transitions between payoff matrices.
@@ -53,8 +53,8 @@ class Player(BasePlayer):
         return self.get_others_in_group()[0]
 
     def set_payoff(self):
-        self.decisions_over_time = Decision.objects.filter(
-            component='otree-bimatrix',
+        self.decisions_over_time = Event.objects.filter(
+            channel='decisions',
             session=self.session,
             subsession=self.subsession.name(),
             round=self.round_number,
