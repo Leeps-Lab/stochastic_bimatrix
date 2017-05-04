@@ -12,6 +12,9 @@ from datetime import timedelta
 import logging
 import time
 
+from math import sqrt
+import random
+
 
 def vars_for_all_templates(self):
     payoff_grid = Constants.payoff_grid_array[1]
@@ -51,6 +54,7 @@ class DecisionWaitPage(WaitPage):
 
 class Decision(redwood_views.ContinuousDecisionPage):
     period_length = Constants.period_length
+    current_matrix = 0
 
     def when_all_players_ready(self):
         super().when_all_players_ready()
@@ -64,6 +68,21 @@ class Decision(redwood_views.ContinuousDecisionPage):
         self.emitter.start()
 
     def tick(self, current_interval, intervals, group):
+        # set C to be distance from decision to corner with lowest probability divided by the maximum distance
+        A, B = list(self.group_decisions.values())
+        # 0th matrix has high probability in bottom right
+        if self.current_matrix == 0:
+            A, B = 1 - A, 1 - B
+        C = sqrt(A**2 + B**2) / sqrt(2)
+
+        # probability of a change is proportional to C^4 (arbitrary, but this makes a nice slope towards corner)
+        Pmax = .2
+        P = C**4 * Pmax
+        if random.uniform(0, 1) < P:
+            self.current_matrix = 1 - self.current_matrix
+            print(str.format('matrix changed with A={}, B={}, P={}', A, B, P))
+
+        consumers.send(self.group, 'current_matrix', self.current_matrix)
         consumers.send(self.group, 'tick', {
             'current_interval': current_interval,
             'intervals': intervals,
