@@ -16,33 +16,17 @@ from math import sqrt
 import random
 
 
-def vars_for_all_templates(self):
-    payoff_grid = Constants.payoff_grid_array[1]
-    if (self.player.id_in_group == 1):
-        return {
-            "my_A_A_payoff": payoff_grid[0][0],
-            "my_A_B_payoff": payoff_grid[1][0],
-            "my_B_A_payoff": payoff_grid[2][0],
-            "my_B_B_payoff": payoff_grid[3][0],
-            "other_A_A_payoff": payoff_grid[0][1],
-            "other_A_B_payoff": payoff_grid[1][1],
-            "other_B_A_payoff": payoff_grid[2][1],
-            "other_B_B_payoff": payoff_grid[3][1],
-            "total_q": 1
-        }
-    else:
-        return {
-            "my_A_A_payoff": payoff_grid[0][1],
-            "my_A_B_payoff": payoff_grid[1][1],
-            "my_B_A_payoff": payoff_grid[2][1],
-            "my_B_B_payoff": payoff_grid[3][1],
-            "other_A_A_payoff": payoff_grid[0][0],
-            "other_A_B_payoff": payoff_grid[1][0],
-            "other_B_A_payoff": payoff_grid[2][0],
-            "other_B_B_payoff": payoff_grid[3][0],
-            "total_q": 1
-        }
+class UndefinedTreatmentError(ValueError):
+    pass
 
+def vars_for_all_templates(self):
+
+    if 'treatment' in self.session.config:
+        payoff_grid = Constants.treatments[self.session.config['treatment']]
+    else:
+        raise UndefinedTreatmentError('no treatment attribute in settings.py')
+
+    return locals()
 
 class Introduction(Page):
     timeout_seconds = 100
@@ -83,11 +67,6 @@ class Decision(redwood_views.ContinuousDecisionPage):
             print(str.format('matrix changed with A={}, B={}, P={}', A, B, P))
 
         consumers.send(self.group, 'current_matrix', self.current_matrix)
-        consumers.send(self.group, 'tick', {
-            'current_interval': current_interval,
-            'intervals': intervals,
-            'timestamp': time.time()
-        })
 
 
 class Results(Page):

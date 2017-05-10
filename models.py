@@ -20,21 +20,22 @@ class Constants(BaseConstants):
     players_per_group = 2
     num_rounds = 10
 
-    #payoff grid
-    payoff_grid_array = [
-        [
-            [ 100, 100 ], [ 0,   800 ],
-            [ 800, 0   ], [ 300, 300 ]
-        ],
-        [
-            [ 800, 0   ], [ 0,   200 ],
-            [ 0,   200 ], [ 200, 0   ]
-        ]
-    ]
-
     base_points = 0
 
     period_length = 120
+
+    treatments = {
+        'A': [
+            [
+                [ 100, 100 ], [ 0,   800 ],
+                [ 800, 0   ], [ 300, 300 ]
+            ],
+            [
+                [ 800, 0   ], [ 0,   200 ],
+                [ 0,   200 ], [ 200, 0   ]
+            ]
+        ],
+    }
 
 
 class Subsession(BaseSubsession):
