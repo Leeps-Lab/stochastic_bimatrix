@@ -19,12 +19,14 @@ import random
 class UndefinedTreatmentError(ValueError):
     pass
 
-def vars_for_all_templates(self):
-
+def treatment(self):
     if 'treatment' in self.session.config:
-        payoff_grid = Constants.treatments[self.session.config['treatment']]
+        return Constants.treatments[self.session.config['treatment']]
     else:
         raise UndefinedTreatmentError('no treatment attribute in settings.py')
+
+def vars_for_all_templates(self):
+    payoff_grid = treatment(self)['payoff_grid']
 
     return locals()
 
@@ -39,6 +41,7 @@ class DecisionWaitPage(WaitPage):
 class Decision(redwood_views.ContinuousDecisionPage):
     period_length = Constants.period_length
     current_matrix = 0
+    initial_decision = .5
 
     def when_all_players_ready(self):
         super().when_all_players_ready()
@@ -52,21 +55,18 @@ class Decision(redwood_views.ContinuousDecisionPage):
         self.emitter.start()
 
     def tick(self, current_interval, intervals, group):
-        # set C to be distance from decision to corner with lowest probability divided by the maximum distance
-        A, B = list(self.group_decisions.values())
-        # 0th matrix has high probability in bottom right
-        if self.current_matrix == 0:
-            A, B = 1 - A, 1 - B
-        C = sqrt(A**2 + B**2) / sqrt(2)
-
-        # probability of a change is proportional to C^4 (arbitrary, but this makes a nice slope towards corner)
+        q1, q2 = list(self.group_decisions.values()) # decisions
+        p11, p12, p21, p22 = [pij[self.current_matrix] for pij in treatment(self)['transition_probabilities']] # transition probabilities
         Pmax = .2
-        P = C**4 * Pmax
-        if random.uniform(0, 1) < P:
+        Pswitch = Pmax * ( q1*q2*p11 + q1*(1-q2)*p12 + (1-q1)*q2*p21 + (1-q1)*(1-q2)*p22 )
+
+        if random.uniform(0, 1) < Pswitch:
             self.current_matrix = 1 - self.current_matrix
-            print(str.format('matrix changed with A={}, B={}, P={}', A, B, P))
+            print(str.format('matrix changed with q1={}, q2={}, P={}', q1, q2, Pswitch))
+            # TODO: save matrix transitions to database
 
         consumers.send(self.group, 'current_matrix', self.current_matrix)
+        consumers.send(self.group, 'hazard_rate', Pswitch/Pmax)
 
 
 class Results(Page):
