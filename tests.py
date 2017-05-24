@@ -1,19 +1,15 @@
-# -*- coding: utf-8 -*-
-from __future__ import division
-
-import random
-
-from otree.common import Currency as c, currency_range
-
+from otree.api import Bot, Submission
 from . import views
-from ._builtin import Bot
-from .models import Constants
 
 
 class PlayerBot(Bot):
 
     def play_round(self):
-        pass
+        if self.player.round_number == 1:
+            yield views.Introduction
+        yield Submission(views.Decision, {}, check_html=False)
+        yield views.Results
+
 
     def validate_play(self):
-        pass
+        assert self.payoff > 0
