@@ -6,6 +6,7 @@ from otree.common import Currency as c, currency_range
 from .models import Constants
 import otree_redwood.abstract_views as redwood_views
 from otree_redwood import consumers
+from otree_redwood.models import Event
 
 from django.utils import timezone
 from datetime import timedelta
@@ -58,12 +59,22 @@ class Decision(redwood_views.ContinuousDecisionPage):
         q1, q2 = list(self.group_decisions.values()) # decisions
         p11, p12, p21, p22 = [pij[self.current_matrix] for pij in treatment(self)['transition_probabilities']] # transition probabilities
         Pmax = .2
-        Pswitch = Pmax * ( q1*q2*p11 + q1*(1-q2)*p12 + (1-q1)*q2*p21 + (1-q1)*(1-q2)*p22 )
+        Pswitch = (p11 * q1 * q2 +
+                   p12 * q1 * (1 - q2) +
+                   p21 * (1 - q1) * q2 +
+                   p22 * (1 - q1) * (1 - q2)) * Pmax
 
         if random.uniform(0, 1) < Pswitch:
             self.current_matrix = 1 - self.current_matrix
             print(str.format('matrix changed with q1={}, q2={}, P={}', q1, q2, Pswitch))
-            # TODO: save matrix transitions to database
+            Event.objects.create(
+                session=self.session,
+                subsession=self.subsession.name(),
+                round=self.round_number,
+                group=self.group.id_in_subsession,
+                channel='transitions',
+                value=self.current_matrix
+            )
 
         consumers.send(self.group, 'current_matrix', self.current_matrix)
         consumers.send(self.group, 'hazard_rate', Pswitch/Pmax)
@@ -75,7 +86,6 @@ class Results(Page):
         self.player.set_payoff()
 
         return {
-            'decisions_over_time': self.player.decisions_over_time,
             'total_plus_base': self.player.payoff + Constants.base_points
         }
 

@@ -36,10 +36,11 @@ class Constants(BaseConstants):
                     [   0, 200 ], [ 200,   0 ]
                 ]
             ],
-            'transition_probabilities' : [
-                [ 1,   0   ], [ 0,   0   ],
-                [ 0,   0   ], [ 0,   1   ]
-            ]
+            'transition_probabilities' :
+                [
+                    [ 1,   0   ], [ 0,   0   ],
+                    [ 0,   0   ], [ 0,   1   ]
+                ]
         },
         'B': {
             'payoff_grid': [
@@ -52,10 +53,11 @@ class Constants(BaseConstants):
                     [   0, 200 ], [ 200,   0 ]
                 ]
             ],
-            'transition_probabilities' : [
-                [ 0.8, 0.2 ], [   0,   0 ],
-                [   0,   0 ], [ 0.2, 0.8 ]
-            ]
+            'transition_probabilities' :
+                [
+                    [ 0.8, 0.2 ], [   0,   0 ],
+                    [   0,   0 ], [ 0.2, 0.8 ]
+                ]
         },
     }
 
@@ -71,61 +73,61 @@ class Group(BaseGroup):
 
 
 class Player(BasePlayer):
-    
+
     def other_player(self):
         return self.get_others_in_group()[0]
 
     def set_payoff(self):
-        self.decisions_over_time = Event.objects.filter(
-            channel='decisions',
+        events_over_time = Event.objects.filter(
             session=self.session,
             subsession=self.subsession.name(),
             round=self.round_number,
             group=self.group.id_in_subsession
         )
+        # filter further into only transition and decision events
+        useful_events_over_time = []
+        for event in events_over_time:
+            if (event.channel == 'decisions' or event.channel == 'transitions') and event.value != None: # why is the not None check needed?
+                useful_events_over_time.append(event)
 
         payoff = 0
 
-        # default state when no decisions have been made
-        my_state = .5
-        other_state = .5
+        treatment = Constants.treatments[self.session.config['treatment']]
+        payoff_grids = treatment['payoff_grid']
 
-        payoff_grid = Constants.payoff_grid[1]
-        if (self.id_in_group == 1):
-            A_A_payoff = payoff_grid[0][0]
-            A_B_payoff = payoff_grid[1][0]
-            B_A_payoff = payoff_grid[2][0]
-            B_B_payoff = payoff_grid[3][0]
-        else:
-            A_A_payoff = payoff_grid[0][1]
-            A_B_payoff = payoff_grid[1][1]
-            B_A_payoff = payoff_grid[2][1]
-            B_B_payoff = payoff_grid[3][1]
+        my_state, other_state = .5, .5
+        current_matrix = 0
 
-        cur_payoff = (A_A_payoff + A_B_payoff + B_A_payoff + B_B_payoff) * .25 / Constants.period_length
-        if (len(self.decisions_over_time) > 0):
-            next_change_time = self.decisions_over_time[0].timestamp
-        else:
-            next_change_time = self.session.vars['end_time_{}'.format(self.group.id_in_subsession)]
-        payoff += (next_change_time - self.session.vars['start_time_{}'.format(self.group.id_in_subsession)]).total_seconds() * cur_payoff
+        for i, change in enumerate(useful_events_over_time):
+            if change.channel == 'transitions':
+                current_matrix = change.value
+            elif change.channel == 'decisions':
+                if change.participant == self.participant:
+                    my_state = change.value
+                else:
+                    other_state = change.value
+            
+            payoff_grid = [payoff[self.id_in_group - 1] for payoff in payoff_grids[current_matrix]]
 
-        for i, change in enumerate(self.decisions_over_time):
-            if change.participant == self.participant:
-                my_state = change.value
-            else:
-                other_state = change.value
+            cur_payoff = (payoff_grid[0] * my_state * other_state +
+                          payoff_grid[1] * my_state * (1 - other_state) +
+                          payoff_grid[2] * (1 - my_state) * other_state +
+                          payoff_grid[3] * (1 - my_state) * (1 - other_state)) / Constants.period_length
 
-            cur_payoff = ((A_A_payoff * my_state * other_state) +
-                          (A_B_payoff * my_state * (1 - other_state)) +
-                          (B_A_payoff * (1 - my_state) * other_state) +
-                          (B_B_payoff * (1 - my_state) * (1 - other_state))) / Constants.period_length
+            print(change.channel, change.value)
+            print('cur_payoff={}'.format(cur_payoff))
 
-            if i == len(self.decisions_over_time) - 1:
+            if i < len(useful_events_over_time) - 1: # not last change
+                next_change_time = useful_events_over_time[i + 1].timestamp
+            else: # last change
+                print(self.session.vars) # why is this sometimes not set?
                 next_change_time = self.session.vars['end_time_{}'.format(self.group.id_in_subsession)]
-            else:
-                next_change_time = self.decisions_over_time[i + 1].timestamp
+            
+            time_diff = (next_change_time - change.timestamp).total_seconds()
 
-            payoff += (next_change_time - change.timestamp).total_seconds() * cur_payoff
+            print('time_diff={}'.format(time_diff))
 
+            payoff += time_diff * cur_payoff
+
+        print('payoff={}'.format(payoff))
         self.payoff = payoff
-
