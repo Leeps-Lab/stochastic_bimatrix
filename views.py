@@ -56,6 +56,7 @@ class Decision(redwood_views.ContinuousDecisionPage):
         self.emitter.start()
 
     def tick(self, current_interval, intervals, group):
+        # TODO: make this stop when game exited potentially before 120s
         q1, q2 = list(self.group_decisions.values()) # decisions
         p11, p12, p21, p22 = [pij[self.current_matrix] for pij in treatment(self)['transition_probabilities']] # transition probabilities
         Pmax = .2
