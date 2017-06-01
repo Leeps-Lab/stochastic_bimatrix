@@ -20,6 +20,11 @@
          oTree.participantCode = "{{ player.participant.code }}";
          oTree.appName = "{{ subsession.app_name }}";
          oTree.idInGroup = "{{ player.id_in_group }}";
+         {% if True %}
+         oTree.debug = true;
+         {% else %}
+         oTree.debug = false;
+         {% endif %}
        })();
      </script>
 
