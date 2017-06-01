@@ -77,14 +77,14 @@ class Decision(redwood_views.ContinuousDecisionPage):
                 value=self.current_matrix
             )
 
-        consumers.send(self.group, 'current_matrix', self.current_matrix)
-        consumers.send(self.group, 'hazard_rate', Pswitch/Pmax)
+            consumers.send(self.group, 'current_matrix', self.current_matrix)
+            consumers.send(self.group, 'hazard_rate', Pswitch/Pmax)
 
 
 class Results(Page):
     
     def vars_for_template(self):
-        self.player.set_payoff()
+        self.player.set_payoff(Decision.initial_decision)
 
         return {
             'total_plus_base': self.player.payoff + Constants.base_points
