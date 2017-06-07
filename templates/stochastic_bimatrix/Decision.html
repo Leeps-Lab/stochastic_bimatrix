@@ -39,6 +39,7 @@
 {% block content %}
     <stochastic-bimatrix
         payoff-matrices='{{ payoff_grid }}'
+        transition-probabilities='{{ transition_probabilities }}'
         period-length='{{ Constants.period_length }}'>
     </stochastic-bimatrix>
 

@@ -15,6 +15,12 @@ Two-by-two game with stochastic transitions between payoff matrices.
 """
 
 
+# from .test_payoff import fill_events
+# do_test = False
+
+# if
+
+
 class Constants(BaseConstants):
     name_in_url = 'stochastic_bimatrix'
     players_per_group = 2
