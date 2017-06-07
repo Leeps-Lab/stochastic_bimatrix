@@ -51,7 +51,7 @@
                         ></bimatrix-heatmap>
                     </div>
                     <div style="display:inline-block">
-                        <hazard-bar></hazard-bar>
+                        <hazard-bar hazard-rate="[[ hazardRate ]]"></hazard-bar>
                     </div>
                     <div style="display:inline-block;margin-left:20px">
                         <bimatrix-heatmap
@@ -103,7 +103,7 @@
                                 min="0"
                                 max="1"
                                 step=".01"
-                                value="{{ myDecision::input }}">
+                                value="{{ myDecision::change }}">
                         </div>
                     </div>
                     <div style="display:inline-block">
@@ -134,12 +134,19 @@
             is: 'stochastic-bimatrix',
             properties: {
                 payoffMatrices: Array,
-                myDecision: Number,
-                otherDecision: Number,
+                transitionProbabilities: Array,
+                myDecision: {
+                    type: Number,
+                    observer: '_handleDecisionChanged',
+                },
+                otherDecision: {
+                    type: Number,
+                    observer: '_handleDecisionChanged',
+                },
                 periodLength: Number,
                 currentMatrix: {
                     type: Number,
-                    observer: '_currentMatrixChanged',
+                    observer: '_handleMatrixTransition',
                 }
             },
             ready() {
@@ -150,7 +157,7 @@
                 } else {
                     this.payoffIndex = this.$.constants.idInGroup - 1;
                 }
-                this.otherPayoffIndex = 1 - this.payoffIndex
+                this.otherPayoffIndex = 1 - this.payoffIndex;
 
                 this.currentMatrix = 1;
 
@@ -159,6 +166,7 @@
                 this.otherColor = 'mono';
 
                 this._calcPayoffs();
+                this._calcHazardRate();
             },
             _calcPayoffs() {
                 // get two matrix indices
@@ -174,21 +182,30 @@
                 this.otherPayoffs_B = this.payoffMatrices[index_B].map(
                     val => parseInt(val[this.otherPayoffIndex]));
             },
-            // handle switch-matrix button pressed
-            _currentMatrixChanged(event) {
-                console.log('current matrix changed to ', event);
-                // get heatmaps
-                // const
-                //     P1A = $('#heatmap-P1-A'),
-                //     P2A = $('#heatmap-P2-A'),
-                //     P1B = $('#heatmap-P1-B'),
-                //     P2B = $('#heatmap-P2-B');
-                // do animation
-                // P1A.animate({ left: P1B.offset().left, top: P1B.offset().top });
-
-                // change payoff functions
+            _calcHazardRate() {
+                if (!(this.currentMatrix != undefined && this.myDecision && this.otherDecision))
+                    return;
+                console.log('calchazardrate', this.currentMatrix);
+                const p11 = this.transitionProbabilities[0][this.currentMatrix];
+                const p12 = this.transitionProbabilities[1][this.currentMatrix];
+                const p21 = this.transitionProbabilities[2][this.currentMatrix];
+                const p22 = this.transitionProbabilities[3][this.currentMatrix];
+                const q1 = this.myDecision;
+                const q2 = this.otherDecision;
+                this.hazardRate = 
+                    p11 * q1 * q2 +
+                    p12 * q1 * (1 - q2) +
+                    p21 * (1 - q1) * q2 +
+                    p22 * (1 - q1) * (1 - q2);
+                console.log(this.hazardRate);
+            },
+            _handleDecisionChanged() {
+                this._calcHazardRate();
+            },
+            _handleMatrixTransition() {
                 this._calcPayoffs();
-            }
+                this._calcHazardRate();
+            },
         })
     </script>
 </dom-module>
