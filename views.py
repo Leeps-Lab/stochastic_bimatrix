@@ -60,14 +60,15 @@ class Decision(redwood_views.ContinuousDecisionPage):
         q1, q2 = list(self.group_decisions.values()) # decisions
         p11, p12, p21, p22 = [pij[self.current_matrix] for pij in treatment(self)['transition_probabilities']] # transition probabilities
         # probability of a switch in 2 seconds = 1/2
-        # solved by P(switch in t) = (1-p)^10t = .5
+        # solved by P(switch in t) = (1-p)^10t = 1/2
         Pmax = .034064
         Pswitch = (p11 * q1 * q2 +
                    p12 * q1 * (1 - q2) +
                    p21 * (1 - q1) * q2 +
                    p22 * (1 - q1) * (1 - q2)) * Pmax
-        print(Pswitch)
-        
+
+        if random.uniform(0, 1) < .1: print(Pswitch, list(self.group_decisions.values()), self.current_matrix)
+
         if random.uniform(0, 1) < Pswitch:
             self.current_matrix = 1 - self.current_matrix
             print(str.format('matrix changed with q1={}, q2={}, P={}', q1, q2, Pswitch))
