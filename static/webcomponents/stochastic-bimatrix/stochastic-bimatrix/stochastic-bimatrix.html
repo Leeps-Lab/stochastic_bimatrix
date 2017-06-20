@@ -96,7 +96,7 @@
                         <div style="margin-top:10px; text-align:center">Your Payoff</div>
                     </div>
                     <div style="display:inline-block; margin-left:20px; margin-right:20px">
-                        <div style="position:relative; bottom:20px">
+                        <div style="position:relative; bottom:35px">
                             <input
                                 id="slider"
                                 type="range"
@@ -161,16 +161,21 @@
                 this.otherPayoffIndex = 1 - this.payoffIndex;
 
                 // transpose payoff matrices if is player controlling vertical line
-                console.log(this.payoffMatrices);
-                // if (this.payoffIndex = 1) {
-                //     const temp_A = this.payoffMatrices[0][1];
-                //     this.payoffMatrices[0][1] = this.payoffMatrices[0][2];
-                //     this.payoffMatrices[0][2] = temp_A;
-                //     const temp_B = this.payoffMatrices[1][1];
-                //     this.payoffMatrices[1][1] = this.payoffMatrices[1][2];
-                //     this.payoffMatrices[1][2] = temp_B;
-                // }
-                console.log(this.payoffMatrices);
+                if (this.$.constants.idInGroup == 2) {
+                    let temp;
+                    temp = this.payoffMatrices[0][1][0];
+                    this.payoffMatrices[0][1][0] = this.payoffMatrices[0][2][0];
+                    this.payoffMatrices[0][2][0] = temp;
+                    temp = this.payoffMatrices[0][1][1];
+                    this.payoffMatrices[0][1][1] = this.payoffMatrices[0][2][1]
+                    this.payoffMatrices[0][2][1] = temp;
+                    temp = this.payoffMatrices[1][1][0];
+                    this.payoffMatrices[1][1][0] = this.payoffMatrices[1][2][0];
+                    this.payoffMatrices[1][2][0] = temp;
+                    temp = this.payoffMatrices[1][1][1];
+                    this.payoffMatrices[1][1][1] = this.payoffMatrices[1][2][1]
+                    this.payoffMatrices[1][2][1] = temp;
+                }
 
                 this.currentMatrix = 0;
 

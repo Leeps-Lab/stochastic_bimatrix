@@ -69,19 +69,19 @@ class Decision(redwood_views.ContinuousDecisionPage):
 
         if random.uniform(0, 1) < .1: print(Pswitch, list(self.group_decisions.values()), self.current_matrix)
 
-        # if random.uniform(0, 1) < Pswitch:
-        #     self.current_matrix = 1 - self.current_matrix
-        #     print(str.format('matrix changed with q1={}, q2={}, P={}', q1, q2, Pswitch))
-        #     Event.objects.create(
-        #         session=self.session,
-        #         subsession=self.subsession.name(),
-        #         round=self.round_number,
-        #         group=self.group.id_in_subsession,
-        #         channel='transitions',
-        #         value=self.current_matrix
-        #     )
+        if random.uniform(0, 1) < Pswitch:
+            self.current_matrix = 1 - self.current_matrix
+            print(str.format('matrix changed with q1={}, q2={}, P={}', q1, q2, Pswitch))
+            Event.objects.create(
+                session=self.session,
+                subsession=self.subsession.name(),
+                round=self.round_number,
+                group=self.group.id_in_subsession,
+                channel='transitions',
+                value=self.current_matrix
+            )
 
-        #     consumers.send(self.group, 'current_matrix', self.current_matrix)
+            consumers.send(self.group, 'current_matrix', self.current_matrix)
 
 
 class Results(Page):
