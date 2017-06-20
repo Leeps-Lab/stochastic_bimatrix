@@ -150,7 +150,7 @@
                 }
             },
             ready() {
-                console.log(this.$.constants.idInGroup);
+                console.log('ID in Group: ' + this.$.constants.idInGroup);
                 // set payoff indices
                 if (this.$.constants.idInGroup == undefined) {
                     console.log('Not in game, manually setting payoffIndex');
@@ -159,6 +159,18 @@
                     this.payoffIndex = this.$.constants.idInGroup - 1;
                 }
                 this.otherPayoffIndex = 1 - this.payoffIndex;
+
+                // transpose payoff matrices if is player controlling vertical line
+                console.log(this.payoffMatrices);
+                // if (this.payoffIndex = 1) {
+                //     const temp_A = this.payoffMatrices[0][1];
+                //     this.payoffMatrices[0][1] = this.payoffMatrices[0][2];
+                //     this.payoffMatrices[0][2] = temp_A;
+                //     const temp_B = this.payoffMatrices[1][1];
+                //     this.payoffMatrices[1][1] = this.payoffMatrices[1][2];
+                //     this.payoffMatrices[1][2] = temp_B;
+                // }
+                console.log(this.payoffMatrices);
 
                 this.currentMatrix = 0;
 
@@ -173,6 +185,8 @@
                 // get two matrix indices
                 const index_A = this.currentMatrix;
                 const index_B = 1 - index_A;
+                console.log(this.currentMatrix);
+
                 // get four payoff matrices
                 this.myPayoffs_A = this.payoffMatrices[index_A].map(
                     val => parseInt(val[this.payoffIndex]));
@@ -186,19 +200,17 @@
             _calcHazardRate() {
                 if (this.currentMatrix == undefined || this.myDecision == undefined || this.otherDecision == undefined)
                     return;
-                console.log('calchazardrate', this.currentMatrix);
                 const p11 = this.transitionProbabilities[0][this.currentMatrix];
                 const p12 = this.transitionProbabilities[1][this.currentMatrix];
                 const p21 = this.transitionProbabilities[2][this.currentMatrix];
                 const p22 = this.transitionProbabilities[3][this.currentMatrix];
                 const q1 = this.$.constants.idInGroup == 1 ? this.myDecision : this.otherDecision;
                 const q2 = this.$.constants.idInGroup == 2 ? this.myDecision : this.otherDecision;
-                this.hazardRate = 
+                this.hazardRate =
                     p11 * q1 * q2 +
                     p12 * q1 * (1 - q2) +
                     p21 * (1 - q1) * q2 +
                     p22 * (1 - q1) * (1 - q2);
-                console.log(this.hazardRate);
             },
             _handleDecisionChanged() {
                 this._calcHazardRate();

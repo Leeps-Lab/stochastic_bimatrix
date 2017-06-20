@@ -44,8 +44,8 @@ class Constants(BaseConstants):
             ],
             'transition_probabilities':
                 [
-                    [ 1,   0   ], [ 0,   0   ],
-                    [ 0,   0   ], [ 0,   1   ]
+                    [   1,   0 ], [   0,   0 ],
+                    [   0,   0 ], [   0,   1 ]
                 ]
         },
         'B': {
