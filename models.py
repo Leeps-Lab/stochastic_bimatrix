@@ -90,50 +90,61 @@ class Player(BasePlayer):
             round=self.round_number,
             group=self.group.id_in_subsession
         )
+
+        if not events_over_time:
+            return 0
+
         useful_events_over_time = [
             event for event in events_over_time
             if event.channel == 'decisions' or event.channel == 'transitions'
         ]
+
+        # always None due to a bug. REMOVE WHEN THIS IS FIXED
+        del useful_events_over_time[2]
+
         self.payoff = get_payoff(
             useful_events_over_time,
             self.id_in_group,
             self.participant.code,
             Constants.treatments[self.session.config['treatment']]['payoff_grid']
         )
+        print(self.payoff)
 
 
 def get_payoff(events_over_time, id_in_group, participant_code, payoff_grids):
     payoff = 0
 
     # defaults
-    my_state, other_state = 0.5, 0.5
+    q1, q2 = 0.5, 0.5
     current_matrix = 0
 
     for i, change in enumerate(events_over_time):
         if change.value == None: break
 
-        print(change.channel, change.value)
-
         if change.channel == 'transitions':
             current_matrix = change.value
         elif change.channel == 'decisions':
-            if change.participant.code == participant_code:
-                my_state = change.value
+            # decision was made by me and my id is 1, or decision was made by opponent and my id is 2
+            if (change.participant.code == participant_code) is (id_in_group == 1):
+                q1 = change.value
+                print('q1={}'.format(change.value))
             else:
-                other_state = change.value
+                q2 = change.value
+                print('q2={}'.format(change.value))
 
         payoff_grid = [payoff[id_in_group - 1] for payoff in payoff_grids[current_matrix]]
 
-        cur_payoff = (payoff_grid[0] * my_state * other_state +
-                      payoff_grid[1] * my_state * (1 - other_state) +
-                      payoff_grid[2] * (1 - my_state) * other_state +
-                      payoff_grid[3] * (1 - my_state) * (1 - other_state))
+        cur_payoff = (
+            payoff_grid[0] * q1 * q2 +
+            payoff_grid[1] * q1 * (1 - q2) +
+            payoff_grid[2] * (1 - q1) * q2 +
+            payoff_grid[3] * (1 - q1) * (1 - q2)
+        )
 
         next_change_time = events_over_time[i + 1].timestamp
 
         time_diff = (next_change_time - change.timestamp).total_seconds()
 
-        print('cur_payoff={}, time_diff={}'.format(cur_payoff, time_diff))
         payoff += time_diff * cur_payoff
 
     return payoff / Constants.period_length

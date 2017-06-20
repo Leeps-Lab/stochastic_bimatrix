@@ -43,13 +43,15 @@ def test_get_payoff():
 
     create_event('decisions', 0.5, p1, 0)
     create_event('decisions', 0.5, p2, 0)
+
     create_event('decisions', 0.8, p2, 5)
     create_event('decisions', 0.9, p1, 10)
     create_event('transitions', 1, None, 12)
     create_event('decisions', 0.4, p1, 18)
     create_event('decisions', 0.7, p1, 20)
-    create_event('decisions', None, p1, 120)
-    create_event('decisions', None, p2, 120)
+
+    create_event('decisions', None, p1, models.Constants.period_length)
+    create_event('decisions', None, p2, models.Constants.period_length)
 
 
     events_over_time = Event.objects.filter(
@@ -69,14 +71,14 @@ def test_get_payoff():
     ]
 
     print('RUNNING GET_PAYOFF FOR PLAYER 1 ----------------------------------------------')
-    payoff1 = models.get_payoff(events_over_time, 0, p1.code, payoff_grids)
+    payoff1 = models.get_payoff(events_over_time, 1, p1.code, payoff_grids)
 
     print('RUNNING GET_PAYOFF FOR PLAYER 2 ----------------------------------------------')
-    payoff2 = models.get_payoff(events_over_time, 1, p2.code, payoff_grids)
+    payoff2 = models.get_payoff(events_over_time, 2, p2.code, payoff_grids)
 
     print('RESULTS ----------------------------------------------------------------------')
-    assert 0 < payoff1 and payoff1 < 100000
-    assert 0 < payoff2 and payoff2 < 100000
-    assert abs(payoff1 - 90.25) < 1
-    assert abs(payoff2 - 439.45) < 1
+    assert 0 <= payoff1 and payoff1 <= 800
+    assert 0 <= payoff2 and payoff2 <= 800
+    assert abs(payoff1 - 448) < 1
+    assert abs(payoff2 - 90) < 1
     print(payoff1, payoff2)
