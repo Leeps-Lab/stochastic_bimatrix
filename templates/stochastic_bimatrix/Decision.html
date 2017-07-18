@@ -20,7 +20,7 @@
          oTree.participantCode = "{{ player.participant.code }}";
          oTree.appName = "{{ subsession.app_name }}";
          oTree.idInGroup = "{{ player.id_in_group }}";
-         {% if True %}
+         {% if debug %}
          oTree.debug = true;
          {% else %}
          oTree.debug = false;
@@ -33,7 +33,6 @@
     <link
     		rel="import"
     		href="{% static "webcomponents/stochastic-bimatrix/stochastic-bimatrix/stochastic-bimatrix.html" %}">
-
 {% endblock %}
 
 {% block content %}
