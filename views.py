@@ -35,6 +35,9 @@ def vars_for_all_templates(self):
 class Introduction(Page):
     timeout_seconds = 100
 
+    def is_displayed(self):
+        return self.round_number == 1
+
 
 class DecisionWaitPage(WaitPage):
     body_text = 'Waiting for all players to be ready'
@@ -83,6 +86,7 @@ class Decision(redwood_views.ContinuousDecisionPage):
 
 
 class Results(Page):
+    timeout_seconds = 30
     
     def vars_for_template(self):
         self.player.set_payoff(Decision.initial_decision)

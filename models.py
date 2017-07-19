@@ -28,7 +28,7 @@ class Constants(BaseConstants):
 
     base_points = 0
 
-    period_length = 500
+    period_length = 120
 
     treatments = {
         'A': {
