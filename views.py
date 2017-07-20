@@ -70,7 +70,8 @@ class Decision(redwood_views.ContinuousDecisionPage):
                    p21 * (1 - q1) * q2 +
                    p22 * (1 - q1) * (1 - q2)) * Pmax
 
-        if random.uniform(0, 1) < .1: print(Pswitch, list(self.group_decisions.values()), self.current_matrix)
+        if random.uniform(0, 1) < .1:
+            print(Pswitch, list(self.group_decisions.values()), self.current_matrix)
 
         if random.uniform(0, 1) < Pswitch:
             self.current_matrix = 1 - self.current_matrix

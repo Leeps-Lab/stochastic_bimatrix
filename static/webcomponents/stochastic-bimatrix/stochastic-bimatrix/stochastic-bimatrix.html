@@ -2,6 +2,7 @@
 
 <link rel="import" href="/static/otree-redwood/webcomponents/otree-constants/otree-constants.html">
 <link rel="import" href="/static/otree-redwood/webcomponents/otree-continuous-decision/otree-continuous-decision.html">
+<link rel="import" href="/static/otree-redwood/webcomponents/otree-continuous-decision-bot/otree-continuous-decision-bot.html">
 
 <link rel="import" href="/static/webcomponents/stochastic-bimatrix/bimatrix-heatmap/bimatrix-heatmap.html">
 <link rel="import" href="/static/webcomponents/stochastic-bimatrix/otree-thermometer/otree-thermometer.html">
@@ -30,6 +31,12 @@
             my-decision="{{ myDecision }}"
             other-decision="{{ otherDecision }}">
         </otree-continuous-decision>
+        <otree-continuous-decision-bot
+            id="bot"
+            component="stochastic-bimatrix"
+            my-decision="{{ myDecision }}"
+            other-decision="{{ otherDecision }}">
+        </otree-continuous-decision-bot>
         <matrix-transition
             current-matrix="{{ currentMatrix }}">
         </matrix-transition>
@@ -185,6 +192,18 @@
 
                 this._calcPayoffs();
                 this._calcHazardRate();
+
+                this.$.bot.payoffFunction = (myDecision, otherDecision) => {
+                    const payoffMatrix = this.payoffMatrices[this.currentMatrix];
+                    const Aa = payoffMatrix[0][this.$.constants.idInGroup-1];
+                    const Ab = payoffMatrix[1][this.$.constants.idInGroup-1];
+                    const Ba = payoffMatrix[2][this.$.constants.idInGroup-1];
+                    const Bb = payoffMatrix[3][this.$.constants.idInGroup-1];
+                    const row1 = myDecision * Aa + (1 - myDecision) * Ba;
+                    const row2 = myDecision * Ab + (1 - myDecision) * Bb;
+                    const flowPayoff = otherDecision * row1 + (1 - otherDecision) * row2;
+                    return flowPayoff;
+                 };
             },
             _calcPayoffs() {
                 // get two matrix indices
