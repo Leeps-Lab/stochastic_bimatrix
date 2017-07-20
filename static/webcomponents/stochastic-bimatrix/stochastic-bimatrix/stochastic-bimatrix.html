@@ -2,7 +2,6 @@
 
 <link rel="import" href="/static/otree-redwood/webcomponents/otree-constants/otree-constants.html">
 <link rel="import" href="/static/otree-redwood/webcomponents/otree-continuous-decision/otree-continuous-decision.html">
-<link rel="import" href="/static/otree-redwood/webcomponents/otree-continuous-decision-bot/otree-continuous-decision-bot.html">
 
 <link rel="import" href="/static/webcomponents/stochastic-bimatrix/bimatrix-heatmap/bimatrix-heatmap.html">
 <link rel="import" href="/static/webcomponents/stochastic-bimatrix/otree-thermometer/otree-thermometer.html">
@@ -31,14 +30,8 @@
             my-decision="{{ myDecision }}"
             other-decision="{{ otherDecision }}">
         </otree-continuous-decision>
-        <otree-continuous-decision-bot
-            id="bot"
-            component="stochastic-bimatrix"
-            my-decision="{{ myDecision }}"
-            other-decision="{{ otherDecision }}">
-        </otree-continuous-decision-bot>
         <matrix-transition
-            current-matrix="{{ currentMatrixIndex }}">
+            current-matrix="{{ currentMatrix }}">
         </matrix-transition>
 
         <div>
@@ -151,13 +144,12 @@
                     observer: '_handleDecisionChanged',
                 },
                 periodLength: Number,
-                currentMatrixIndex: {
+                currentMatrix: {
                     type: Number,
                     observer: '_handleMatrixTransition',
                 }
             },
             ready() {
-                Highcharts.seriesTypes.line.prototype.requireSorting = false;
                 console.log('ID in Group: ' + this.$.constants.idInGroup);
                 // set payoff indices
                 if (this.$.constants.idInGroup == undefined) {
@@ -185,7 +177,7 @@
                     this.payoffMatrices[1][2][1] = temp;
                 }
 
-                this.currentMatrixIndex = 0;
+                this.currentMatrix = 0;
 
                 // color schemes for each player's heatmaps
                 this.myColor = 'rainbow';
@@ -193,22 +185,12 @@
 
                 this._calcPayoffs();
                 this._calcHazardRate();
-                this.$.bot.payoffFunction = (myDecision, otherDecision) => {
-                    const payoffMatrix = this.payoffMatrices[this.currentMatrixIndex];
-                    const Aa = payoffMatrix[0][this.$.constants.idInGroup-1];
-                    const Ab = payoffMatrix[1][this.$.constants.idInGroup-1];
-                    const Ba = payoffMatrix[2][this.$.constants.idInGroup-1];
-                    const Bb = payoffMatrix[3][this.$.constants.idInGroup-1];
-                    const row1 = myDecision * Aa + (1 - myDecision) * Ba;
-                    const row2 = myDecision * Ab + (1 - myDecision) * Bb;
-                    const flowPayoff = otherDecision * row1 + (1 - otherDecision) * row2;
-                    return flowPayoff;
-                };
             },
             _calcPayoffs() {
                 // get two matrix indices
-                const index_A = this.currentMatrixIndex;
+                const index_A = this.currentMatrix;
                 const index_B = 1 - index_A;
+                console.log(this.currentMatrix);
 
                 // get four payoff matrices
                 this.myPayoffs_A = this.payoffMatrices[index_A].map(
@@ -221,12 +203,12 @@
                     val => parseInt(val[this.otherPayoffIndex]));
             },
             _calcHazardRate() {
-                if (this.currentMatrixIndex == undefined || this.myDecision == undefined || this.otherDecision == undefined)
+                if (this.currentMatrix == undefined || this.myDecision == undefined || this.otherDecision == undefined)
                     return;
-                const p11 = this.transitionProbabilities[0][this.currentMatrixIndex];
-                const p12 = this.transitionProbabilities[1][this.currentMatrixIndex];
-                const p21 = this.transitionProbabilities[2][this.currentMatrixIndex];
-                const p22 = this.transitionProbabilities[3][this.currentMatrixIndex];
+                const p11 = this.transitionProbabilities[0][this.currentMatrix];
+                const p12 = this.transitionProbabilities[1][this.currentMatrix];
+                const p21 = this.transitionProbabilities[2][this.currentMatrix];
+                const p22 = this.transitionProbabilities[3][this.currentMatrix];
                 const q1 = this.$.constants.idInGroup == 1 ? this.myDecision : this.otherDecision;
                 const q2 = this.$.constants.idInGroup == 2 ? this.myDecision : this.otherDecision;
                 this.hazardRate =
@@ -241,7 +223,7 @@
             _handleMatrixTransition() {
                 this._calcPayoffs();
                 this._calcHazardRate();
-            }
+            },
         })
     </script>
 </dom-module>
