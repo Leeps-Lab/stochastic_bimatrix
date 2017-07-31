@@ -2,6 +2,7 @@
 from __future__ import division
 import random
 
+from django.contrib.contenttypes.models import ContentType
 from otree import widgets
 from otree.db import models
 from otree.constants import BaseConstants
@@ -85,11 +86,8 @@ class Player(BasePlayer):
 
     def set_payoff(self, initial_decision):
         events_over_time = Event.objects.filter(
-            session=self.session,
-            subsession=self.subsession.name(),
-            round=self.round_number,
-            group=self.group.id_in_subsession
-        )
+            content_type=ContentType.objects.get_for_model(self.group),
+            group_pk=self.group.pk)
 
         if not events_over_time:
             return 0
@@ -99,19 +97,30 @@ class Player(BasePlayer):
             if event.channel == 'decisions' or event.channel == 'transitions'
         ]
 
-        # always None due to a bug. REMOVE WHEN THIS IS FIXED
-        del useful_events_over_time[2]
+        period_start = Event.objects.get(
+                channel='state',
+                content_type=ContentType.objects.get_for_model(self.group),
+                group_pk=self.group.pk,
+                value='period_start')
+        period_end = Event.objects.get(
+                channel='state',
+                content_type=ContentType.objects.get_for_model(self.group),
+                group_pk=self.group.pk,
+                value='period_end')
 
         self.payoff = get_payoff(
+            period_start, period_end,
             useful_events_over_time,
             self.id_in_group,
             self.participant.code,
             Constants.treatments[self.session.config['treatment']]['payoff_grid']
         )
-        print(self.payoff)
 
 
-def get_payoff(events_over_time, id_in_group, participant_code, payoff_grids):
+def get_payoff(period_start, period_end, events_over_time, id_in_group, participant_code, payoff_grids):
+
+    period_duration = period_end.timestamp - period_start.timestamp
+
     payoff = 0
 
     # defaults
@@ -119,8 +128,6 @@ def get_payoff(events_over_time, id_in_group, participant_code, payoff_grids):
     current_matrix = 0
 
     for i, change in enumerate(events_over_time):
-        if change.value == None: break
-
         if change.channel == 'transitions':
             current_matrix = change.value
         elif change.channel == 'decisions':
@@ -138,10 +145,12 @@ def get_payoff(events_over_time, id_in_group, participant_code, payoff_grids):
             payoff_grid[0] * q1 * q2 +
             payoff_grid[1] * q1 * (1 - q2) +
             payoff_grid[2] * (1 - q1) * q2 +
-            payoff_grid[3] * (1 - q1) * (1 - q2)
-        )
+            payoff_grid[3] * (1 - q1) * (1 - q2))
 
-        next_change_time = events_over_time[i + 1].timestamp
+        if i + 1 < len(events_over_time):
+            next_change_time = events_over_time[i + 1].timestamp
+        else:
+            next_change_time = period_end.timestamp
 
         time_diff = (next_change_time - change.timestamp).total_seconds()
 

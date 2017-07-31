@@ -3,7 +3,7 @@ from __future__ import division
 from . import models
 from ._builtin import Page, WaitPage
 from otree.common import Currency as c, currency_range
-from .models import Constants
+from .models import Constants, Player
 import otree_redwood.abstract_views as redwood_views
 from otree_redwood import consumers
 from otree_redwood.models import Event
@@ -44,19 +44,20 @@ class DecisionWaitPage(WaitPage):
 
 
 class Decision(redwood_views.ContinuousDecisionPage):
-    period_length = Constants.period_length
-    current_matrix = 0
-    initial_decision = .5
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.current_matrix = 0
+
+    def period_length(self):
+        return Constants.period_length
+
+    def initial_decision(self):
+        return 0.5
 
     def when_all_players_ready(self):
         super().when_all_players_ready()
-        # calculate start and end times for the period
-        start_time = timezone.now()
-        end_time = start_time + timedelta(seconds=Constants.period_length)
-
-        self.session.vars['start_time_{}'.format(self.group.id_in_subsession)] = start_time
-        self.session.vars['end_time_{}'.format(self.group.id_in_subsession)] = end_time
-        self.emitter = redwood_views.DiscreteEventEmitter(0.1, self.period_length, self.group, self.tick)
+        self.emitter = redwood_views.DiscreteEventEmitter(0.1, self.period_length(), self.group, self.tick)
         self.emitter.start()
 
     def tick(self, current_interval, intervals, group):
@@ -77,13 +78,9 @@ class Decision(redwood_views.ContinuousDecisionPage):
             self.current_matrix = 1 - self.current_matrix
             print(str.format('matrix changed with q1={}, q2={}, P={}', q1, q2, Pswitch))
             Event.objects.create(
-                session=self.session,
-                subsession=self.subsession.name(),
-                round=self.round_number,
-                group=self.group.id_in_subsession,
+                group=self.group,
                 channel='transitions',
-                value=self.current_matrix
-            )
+                value=self.current_matrix)
 
             consumers.send(self.group, 'current_matrix', self.current_matrix)
 
@@ -99,61 +96,48 @@ class Results(Page):
         }
 
 
-def get_output_table(session_events):
-    events_by_round_then_group = defaultdict(lambda: defaultdict(lambda: []))
-    for e in session_events:
-        events_by_round_then_group[e.round][e.group].append(e)
+def get_output_table(events):
     header = [
-        'session',
-        'round',
-        'group',
         'tick',
         'player1',
         'player2',
     ]
-    session = session_events[0].session
     rows = []
-    for round, events_by_group in events_by_round_then_group.items():
-        for group, group_events in events_by_group.items():
-            minT = min(e.timestamp for e in group_events)
-            maxT = max(e.timestamp for e in group_events)
-            last_p1_mean = float('nan')
-            last_p2_mean = float('nan')
-            for tick in range((maxT - minT).seconds):
-                currT = minT + datetime.timedelta(seconds=tick)
-                tick_events = []
-                while group_events[0].timestamp <= currT:
-                    e = group_events.pop(0)
-                    if e.channel == 'decisions' and e.value is not None:
-                        tick_events.append(e)
-                p1_decisions = []
-                p2_decisions = []
-                for event in tick_events:
-                    player = Player.objects.get(
-                        participant=event.participant,
-                        session=session,
-                        round_number=round)
-                    if player.id_in_group == 1:
-                        p1_decisions.append(event.value)
-                    elif player.id_in_group == 2:
-                        p2_decisions.append(event.value)
-                    else:
-                        raise ValueError('Invalid player id in group {}'.format(player.id_in_group))
-                p1_mean, p2_mean = last_p1_mean, last_p2_mean
-                if p1_decisions:
-                    p1_mean = sum(p1_decisions) / len(p1_decisions)
-                if p2_decisions:
-                    p2_mean = sum(p2_decisions) / len(p2_decisions)
-                rows.append([
-                    session.code,
-                    round,
-                    group,
-                    tick,
-                    p1_mean,
-                    p2_mean
-                ])
-                last_p1_mean = p1_mean
-                last_p2_mean = p2_mean
+    minT = min(e.timestamp for e in events)
+    maxT = max(e.timestamp for e in events)
+    last_p1_mean = float('nan')
+    last_p2_mean = float('nan')
+    for tick in range((maxT - minT).seconds):
+        currT = minT + timedelta(seconds=tick)
+        tick_events = []
+        while events[0].timestamp <= currT:
+            e = events.pop(0)
+            if e.channel == 'decisions' and e.value is not None:
+                tick_events.append(e)
+        p1_decisions = []
+        p2_decisions = []
+        for event in tick_events:
+            player = Player.objects.get(
+                participant=event.participant,
+                group=e.group)
+            if player.id_in_group == 1:
+                p1_decisions.append(event.value)
+            elif player.id_in_group == 2:
+                p2_decisions.append(event.value)
+            else:
+                raise ValueError('Invalid player id in group {}'.format(player.id_in_group))
+        p1_mean, p2_mean = last_p1_mean, last_p2_mean
+        if p1_decisions:
+            p1_mean = sum(p1_decisions) / len(p1_decisions)
+        if p2_decisions:
+            p2_mean = sum(p2_decisions) / len(p2_decisions)
+        rows.append([
+            tick,
+            p1_mean,
+            p2_mean
+        ])
+        last_p1_mean = p1_mean
+        last_p2_mean = p2_mean
     return header, rows
 
 

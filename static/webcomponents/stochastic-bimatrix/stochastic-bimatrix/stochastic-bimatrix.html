@@ -3,6 +3,7 @@
 <link rel="import" href="/static/otree-redwood/webcomponents/otree-constants/otree-constants.html">
 <link rel="import" href="/static/otree-redwood/webcomponents/otree-continuous-decision/otree-continuous-decision.html">
 <link rel="import" href="/static/otree-redwood/webcomponents/otree-continuous-decision-bot/otree-continuous-decision-bot.html">
+<link rel="import" href="/static/otree-redwood/webcomponents/otree-period/otree-period.html">
 
 <link rel="import" href="/static/webcomponents/stochastic-bimatrix/stochastic-heatmap/stochastic-heatmap.html">
 <link rel="import" href="/static/webcomponents/stochastic-bimatrix/hazard-bar/hazard-bar.html">
@@ -40,6 +41,9 @@
         </style>
 
         <otree-constants id="constants"></otree-constants>
+        <otree-period
+            running="{{ _isPeriodRunning }}">
+        </otree-period>
         <otree-continuous-decision
             component="stochastic-bimatrix"
             my-decision="{{ myDecision }}"
@@ -127,6 +131,7 @@
                                 min="0"
                                 max="1"
                                 step=".01"
+                                disabled$="[[ !_isPeriodRunning ]]"
                                 value="{{ myDecision::change }}">
                         </div>
                     </div>
@@ -185,6 +190,10 @@
                 currentMatrix: {
                     type: Number,
                     observer: '_handleMatrixTransition',
+                },
+                // set by otree-period
+                _isPeriodRunning: {
+                    type: Boolean
                 }
             },
             ready() {
@@ -265,9 +274,6 @@
                     val => val[index_B])
             },
             _calcHazardRate() {
-                // OTHER DECISION IS UNDEFINED
-                this.otherDecision = 0;
-
                 if (this.currentMatrix == undefined || this.myDecision == undefined || this.otherDecision == undefined)
                     return;
                 const p11 = this.transitionProbabilities[0][this.currentMatrix];
