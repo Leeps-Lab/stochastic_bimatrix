@@ -1,0 +1,158 @@
+<link rel="import" href="/static/bower_components/polymer/polymer.html"/>
+
+<dom-module id="stochastic-heatmap">
+	<template>
+		<style>
+		
+			:host {
+				display: inline-block;
+				position: relative;
+				font-size: 9pt;
+				font-weight: bold;
+			}
+
+			canvas {
+				border: 1px black solid;
+			}
+
+			#heatmap-container {
+				position: relative;
+			}
+
+			#my-val {
+				position: absolute;
+				bottom: 0;
+				left: -2%;
+				width: 104%;
+				border-top: 2px solid black;
+			}
+
+			#other-val {
+				position: absolute;
+				height: 104%;
+				right: 0;
+				top: -2%;
+				border-left: 2px solid black; }
+
+		</style>
+
+		<div>
+			<span>
+				$[[_arrayItem(payoffs.*, 0)]],
+				P=[[_arrayItem(probabilities.*, 0)]]
+			</span>
+			<span style="float: right">
+				$[[_arrayItem(payoffs.*, 1)]],
+				P=[[_arrayItem(probabilities.*, 1)]]
+			</span>
+		</div>
+		<div
+			id="heatmap-container"
+			style$="width: [[size]]px; height: [[size]]px">
+			<canvas
+				id="canvas"
+				style$="width: [[size]]px; height: [[size]]px">
+			</canvas>
+			<div
+				id="my-val"
+				style$="height: [[_calcPercent(myDecision)]]">
+			</div>
+			<div
+				id="other-val"
+				style$="width: [[_calcPercent(otherDecision)]]">
+			</div>
+		</div>
+		<div>
+			<span>
+				$[[_arrayItem(payoffs.*, 2)]],
+				P=[[_arrayItem(probabilities.*, 2)]]
+			</span>
+			<span style="float: right">
+				$[[_arrayItem(payoffs.*, 3)]],
+				P=[[_arrayItem(probabilities.*, 3)]]
+			</span>
+		</div>
+
+	</template>
+
+	<script src="/static/general/color.js"></script>
+	
+	<script>
+		Polymer({
+			is: 'stochastic-heatmap',
+			properties: {
+				size: Number,
+				myDecision: Number,
+				otherDecision: Number,
+				payoffs: {
+					type: Array,
+					// observer: 'make_heatmap',
+				},
+				probabilities: {
+					type: Array,
+					observer: 'make_heatmap',
+				},
+				color: {
+					type: String,
+					// observer: 'make_heatmap',
+				},
+			},
+			// format a decision as a CSS percent value
+			_calcPercent(decision) {
+				return decision * 100 + "%"
+			},
+			_arrayItem(change, index) {
+				return change.base[index]
+			},
+			make_heatmap() {
+				if (!this.color || !this.payoffs)
+					return
+				const canvas = this.$.canvas
+				const w = canvas.width
+				const h = canvas.height
+				const ctx = canvas.getContext('2d')
+				
+				const max_payoff = Math.max(... this.payoffs)
+
+				// create empty imageData object
+				const imageData = ctx.createImageData(w, h)
+				const data = imageData.data
+
+				// iterate through every pixel in the image in row major order
+				for (let row = 0; row < h; row++) {
+					// calculate percent distance from bottom and top of image
+					const percent_bottom = row / h
+					const percent_top = 1 - percent_bottom
+					for (let col = 0; col < w; col++) {
+						// calculate percent distance from left and right of image
+						const percent_right = col / w
+						const percent_left = 1 - percent_right
+
+						// calculate the payoff at each pixel by weighting the payoff at each corner by its distance from the pixel
+						const point_payoff = Math.floor(
+							(percent_top * percent_left * this.payoffs[0]) +
+							(percent_top * percent_right * this.payoffs[1]) +
+							(percent_bottom * percent_left * this.payoffs[2]) +
+							(percent_bottom * percent_right * this.payoffs[3])
+						)
+
+						// divide the payoff by the max payoff to get an color intensity percentage
+						// use get_gradient_color to get the appropriate color in the gradient for that percentage
+						const point_color = get_gradient_color(point_payoff / max_payoff, this.color)
+						// if (col == 5) console.log(point_payoff, max_payoff);
+
+						// set imageData for this pixel to the calculated color
+						const index = (row * w * 4) + (col * 4)
+						data[index] = point_color[0]
+						data[index + 1] = point_color[1]
+						data[index + 2] = point_color[2]
+						// set alpha channel to fully opaque
+						data[index + 3] = 255
+					}
+				}
+
+				ctx.putImageData(imageData, 0, 0)
+			},
+		})
+	</script>
+</dom-module>

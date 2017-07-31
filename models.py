@@ -34,8 +34,8 @@ class Constants(BaseConstants):
         'A': {
             'payoff_grid': [
                 [
-                    [ 100, 100 ], [   0, 800 ],
-                    [ 800,   0 ], [ 300, 300 ]
+                    [ 100, 800 ], [ 100, 200 ],
+                    [   0, 200 ], [   0,   0 ]
                 ],
                 [
                     [ 800,   0 ], [   0, 200 ],
@@ -44,8 +44,8 @@ class Constants(BaseConstants):
             ],
             'transition_probabilities':
                 [
-                    [   1,   0 ], [   0,   0 ],
-                    [   0,   0 ], [   0,   1 ]
+                    [   1,   0 ], [   .8,   0 ],
+                    [   0,   0 ], [   .8,   1 ]
                 ]
         },
         'B': {

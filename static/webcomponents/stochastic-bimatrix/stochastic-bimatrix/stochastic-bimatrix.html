@@ -4,11 +4,11 @@
 <link rel="import" href="/static/otree-redwood/webcomponents/otree-continuous-decision/otree-continuous-decision.html">
 <link rel="import" href="/static/otree-redwood/webcomponents/otree-continuous-decision-bot/otree-continuous-decision-bot.html">
 
-<link rel="import" href="/static/webcomponents/stochastic-bimatrix/bimatrix-heatmap/bimatrix-heatmap.html">
-<link rel="import" href="/static/webcomponents/stochastic-bimatrix/otree-thermometer/otree-thermometer.html">
+<link rel="import" href="/static/webcomponents/stochastic-bimatrix/stochastic-heatmap/stochastic-heatmap.html">
 <link rel="import" href="/static/webcomponents/stochastic-bimatrix/hazard-bar/hazard-bar.html">
+<link rel="import" href="/static/webcomponents/stochastic-bimatrix/hazard-iso/hazard-iso.html">
+<link rel="import" href="/static/webcomponents/stochastic-bimatrix/otree-thermometer/otree-thermometer.html">
 <link rel="import" href="/static/webcomponents/stochastic-bimatrix/payoff-graph/payoff-graph.html">
-<link rel="import" href="/static/webcomponents/stochastic-bimatrix/strategy-graph/strategy-graph.html">
 <link rel="import" href="/static/webcomponents/stochastic-bimatrix/matrix-transition/matrix-transition.html">
 
 <dom-module id="stochastic-bimatrix">
@@ -22,6 +22,21 @@
                 width: 8px;
                 height: 310px;
             }
+
+            .rotate {
+                 -webkit-transform: rotate(360deg);
+                -moz-transform: rotate(360deg);
+                -o-transform: rotate(360deg);
+                -ms-transform: rotate(360deg); 
+                transform: rotate(360deg);
+                transition-duration:0.4s;
+            }
+
+            hazard-iso {
+                margin-right: 30px;
+                /* margin-top: -25px; */
+            }
+
         </style>
 
         <otree-constants id="constants"></otree-constants>
@@ -47,27 +62,29 @@
                         Switch
                     </div>
                     <div style="display:inline-block;margin-right:20px">
-                        <bimatrix-heatmap
+                        <stochastic-heatmap
                             id="heatmap-P1-B"
                             size="120"
                             my-decision='[[ myDecision ]]'
                             other-decision='[[ otherDecision ]]'
                             payoffs='[[ myPayoffs_B ]]'
-                            color='gray'
-                        ></bimatrix-heatmap>
+                            probabilities='[[ probabilities_B ]]'
+                            color='[[ inactiveColor ]]'
+                        ></stochastic-heatmap>
                     </div>
                     <div style="display:inline-block">
                         <hazard-bar hazard-rate="[[ hazardRate ]]"></hazard-bar>
                     </div>
                     <div style="display:inline-block;margin-left:20px">
-                        <bimatrix-heatmap
+                        <stochastic-heatmap
                             id="heatmap-P2-B"
                             size="120"
                             my-decision='[[ myDecision ]]'
                             other-decision='[[ otherDecision ]]'
                             payoffs='[[ otherPayoffs_B ]]'
-                            color='gray'
-                        ></bimatrix-heatmap>
+                            probabilities='[[ probabilities_B ]]'
+                            color='[[ inactiveColor ]]'
+                        ></stochastic-heatmap>
                     </div>
                 </div>
                 <div style="float:right">
@@ -91,14 +108,15 @@
             <div style="height: 400px">
                 <div style="float:left">
                     <div style="display:inline-block">
-                        <bimatrix-heatmap
+                        <stochastic-heatmap
                             id="heatmap-P2-A"
                             size="300"
                             my-decision='[[ myDecision ]]'
                             other-decision='[[ otherDecision ]]'
                             payoffs='[[ myPayoffs_A ]]'
+                            probabilities='[[ probabilities_A ]]'
                             color='[[ myColor ]]'
-                        ></bimatrix-heatmap>
+                        ></stochastic-heatmap>
                         <div style="margin-top:10px; text-align:center">Your Payoff</div>
                     </div>
                     <div style="display:inline-block; margin-left:20px; margin-right:20px">
@@ -113,21 +131,35 @@
                         </div>
                     </div>
                     <div style="display:inline-block">
-                        <bimatrix-heatmap
+                        <stochastic-heatmap
                             id="heatmap-P1-A"
                             size="300"
                             my-decision='[[ myDecision ]]'
                             other-decision='[[ otherDecision ]]'
                             payoffs='[[ otherPayoffs_A ]]'
+                            probabilities='[[ probabilities_A ]]'
                             color='[[ otherColor ]]'
-                        ></bimatrix-heatmap>
+                        ></stochastic-heatmap>
                         <div style="margin-top:10px; text-align:center">Other Player</div>
                     </div>
                 </div>
                 <div style="float:right">
                     <div style="width: 250px">
-                        <h3>Text Instructions</h3>
-                        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum</p>
+                        <!-- <h3>Text Instructions</h3>
+                        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum</p> -->
+                        <h3>Hazard Rate Heatmap</h3>
+                        <div style="float:right">
+                            <hazard-iso
+                                size="200"
+                                my-decision='[[ myDecision ]]'
+                                other-decision='[[ otherDecision ]]'
+                                probabilities='[[ probabilities_A ]]'
+                                color='[[ hazardColor ]]'
+                            ></hazard-iso>
+                        </div>
+                        <div style="float:right;">
+                            More saturated areas have higher transition probability.
+                        </div>
                     </div>
                 </div>
             </div>
@@ -166,28 +198,31 @@
                 }
                 this.otherPayoffIndex = 1 - this.payoffIndex;
 
-                // transpose payoff matrices if is player controlling vertical line
+                // transpose payoff and probability matrices if player controls vertical line
                 if (this.$.constants.idInGroup == 2) {
                     let temp;
-                    temp = this.payoffMatrices[0][1][0];
-                    this.payoffMatrices[0][1][0] = this.payoffMatrices[0][2][0];
-                    this.payoffMatrices[0][2][0] = temp;
-                    temp = this.payoffMatrices[0][1][1];
-                    this.payoffMatrices[0][1][1] = this.payoffMatrices[0][2][1]
-                    this.payoffMatrices[0][2][1] = temp;
-                    temp = this.payoffMatrices[1][1][0];
-                    this.payoffMatrices[1][1][0] = this.payoffMatrices[1][2][0];
-                    this.payoffMatrices[1][2][0] = temp;
-                    temp = this.payoffMatrices[1][1][1];
-                    this.payoffMatrices[1][1][1] = this.payoffMatrices[1][2][1]
-                    this.payoffMatrices[1][2][1] = temp;
+                    // first payoff matrix
+                    temp = this.payoffMatrices[0][1];
+                    this.payoffMatrices[0][1] = this.payoffMatrices[0][2];
+                    this.payoffMatrices[0][2] = temp;
+                    // second payoff matrix
+                    temp = this.payoffMatrices[1][1];
+                    this.payoffMatrices[1][1] = this.payoffMatrices[1][2];
+                    this.payoffMatrices[1][2] = temp;
+                    // transition probability matrices
+                    temp = this.transitionProbabilities[1];
+                    this.transitionProbabilities[1] = this.transitionProbabilities[2];
+                    this.transitionProbabilities[2] = temp;
                 }
+
 
                 this.currentMatrix = 0;
 
                 // color schemes for each player's heatmaps
                 this.myColor = 'rainbow';
-                this.otherColor = 'mono';
+                this.otherColor = 'blue';
+                this.hazardColor = 'red';
+                this.inactiveColor = 'gray';
 
                 this._calcPayoffs();
                 this._calcHazardRate();
@@ -203,6 +238,9 @@
                     const flowPayoff = otherDecision * row1 + (1 - otherDecision) * row2;
                     return flowPayoff;
                 };
+
+                // test matrix transitions
+                setTimeout(this._handleMatrixTransition.bind(this), 4000)
             },
             _calcPayoffs() {
                 // get two matrix indices
@@ -219,21 +257,31 @@
                     val => parseInt(val[this.payoffIndex]));
                 this.otherPayoffs_B = this.payoffMatrices[index_B].map(
                     val => parseInt(val[this.otherPayoffIndex]));
+
+                // turn transition probability matrix into two arrays
+                this.probabilities_A = this.transitionProbabilities.map(
+                    val => val[index_A]);
+                this.probabilities_B = this.transitionProbabilities.map(
+                    val => val[index_B])
             },
             _calcHazardRate() {
+                // OTHER DECISION IS UNDEFINED
+                this.otherDecision = 0;
+
                 if (this.currentMatrix == undefined || this.myDecision == undefined || this.otherDecision == undefined)
                     return;
                 const p11 = this.transitionProbabilities[0][this.currentMatrix];
                 const p12 = this.transitionProbabilities[1][this.currentMatrix];
                 const p21 = this.transitionProbabilities[2][this.currentMatrix];
                 const p22 = this.transitionProbabilities[3][this.currentMatrix];
-                const q1 = this.$.constants.idInGroup == 1 ? this.myDecision : this.otherDecision;
-                const q2 = this.$.constants.idInGroup == 2 ? this.myDecision : this.otherDecision;
+                const q1 = this.myDecision;
+                const q2 = this.otherDecision;
                 this.hazardRate =
                     p11 * q1 * q2 +
                     p12 * q1 * (1 - q2) +
                     p21 * (1 - q1) * q2 +
                     p22 * (1 - q1) * (1 - q2);
+                // console.log('calchazardrate='+this.hazardRate);
             },
             _handleDecisionChanged() {
                 this._calcHazardRate();
@@ -241,6 +289,14 @@
             _handleMatrixTransition() {
                 this._calcPayoffs();
                 this._calcHazardRate();
+                // do transition animation if past initialization
+                if (this.doneInitialTransition) {
+                    const heatmaps = document.querySelectorAll('stochastic-heatmap');
+                    $(heatmaps).removeClass('rotate');
+                    setTimeout(() => $(heatmaps).addClass('rotate'), 1);
+                } else {
+                    this.doneInitialTransition = true;
+                }
             },
         })
     </script>
