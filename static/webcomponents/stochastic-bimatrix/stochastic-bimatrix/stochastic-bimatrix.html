@@ -240,13 +240,13 @@
                 };
 
                 // test matrix transitions
-                setTimeout(this._handleMatrixTransition.bind(this), 4000)
+                // setTimeout(this._handleMatrixTransition.bind(this), 4000)
             },
             _calcPayoffs() {
                 // get two matrix indices
                 const index_A = this.currentMatrix;
                 const index_B = 1 - index_A;
-                console.log(this.currentMatrix);
+                // console.log(this.currentMatrix);
 
                 // get four payoff matrices
                 this.myPayoffs_A = this.payoffMatrices[index_A].map(
