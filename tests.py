@@ -1,5 +1,8 @@
+from collections import namedtuple
+
 from otree.api import Bot, Submission
 from . import views
+
 
 class PlayerBot(Bot):
 
@@ -13,8 +16,6 @@ class PlayerBot(Bot):
 
     def validate_play(self):
         assert self.payoff > 0
-
-
 
 
 def test_get_payoff():
@@ -31,35 +32,22 @@ def test_get_payoff():
     p2 = Participant.objects.create(session=sess, code='test_p2_'+str(random.randint(0, 500000)))
     start = timezone.now()
 
-    def create_event(channel, value, participant, timediff):
-        Event.objects.create(
-            session=sess,
-            round=1,
-            group=1,
-            channel=channel,
-            timestamp=start+timezone.timedelta(seconds=timediff),
-            value=value,
-            participant=participant,
-        )
+    MockEvent = namedtuple('Event', ['channel', 'value', 'participant', 'timestamp'])
+    events_over_time = []
 
-    create_event('decisions', 0.5, p1, 0)
-    create_event('decisions', 0.5, p2, 0)
+    period_start = MockEvent('state', 'period_start', p1, start+timezone.timedelta(seconds=0))
 
-    create_event('decisions', 0.8, p2, 5)
-    create_event('decisions', 0.9, p1, 10)
-    create_event('transitions', 1, None, 12)
-    create_event('decisions', 0.4, p1, 18)
-    create_event('decisions', 0.7, p1, 20)
+    events_over_time.append(MockEvent('decisions', 0.5, p1, start+timezone.timedelta(seconds=0)))
+    events_over_time.append(MockEvent('decisions', 0.5, p2, start+timezone.timedelta(seconds=0)))
 
-    create_event('decisions', None, p1, models.Constants.period_length)
-    create_event('decisions', None, p2, models.Constants.period_length)
+    events_over_time.append(MockEvent('decisions', 0.8, p2, start+timezone.timedelta(seconds=5)))
+    events_over_time.append(MockEvent('decisions', 0.9, p1, start+timezone.timedelta(seconds=10)))
+    events_over_time.append(MockEvent('transitions', 1, None, start+timezone.timedelta(seconds=12)))
+    events_over_time.append(MockEvent('decisions', 0.4, p1, start+timezone.timedelta(seconds=18)))
+    events_over_time.append(MockEvent('decisions', 0.7, p1, start+timezone.timedelta(seconds=20)))
 
+    period_end = MockEvent('state', 'period_end', p1, start+timezone.timedelta(seconds=models.Constants.period_length))
 
-    events_over_time = Event.objects.filter(
-        session=sess,
-        round=1,
-        group=1
-    )
     payoff_grids = [
         [
             [ 100, 100 ], [   0, 800 ],
@@ -72,10 +60,10 @@ def test_get_payoff():
     ]
 
     print('RUNNING GET_PAYOFF FOR PLAYER 1 ----------------------------------------------')
-    payoff1 = models.get_payoff(events_over_time, 1, p1.code, payoff_grids)
+    payoff1 = models.get_payoff(period_start, period_end, events_over_time, 1, p1.code, payoff_grids)
 
     print('RUNNING GET_PAYOFF FOR PLAYER 2 ----------------------------------------------')
-    payoff2 = models.get_payoff(events_over_time, 2, p2.code, payoff_grids)
+    payoff2 = models.get_payoff(period_start, period_end, events_over_time, 2, p2.code, payoff_grids)
 
     print('RESULTS ----------------------------------------------------------------------')
     assert 0 <= payoff1 and payoff1 <= 800
