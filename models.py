@@ -7,19 +7,24 @@ from otree import widgets
 from otree.db import models
 from otree.constants import BaseConstants
 from otree.common import Currency as c, currency_range
-from otree.models import BaseSubsession, BaseGroup, BasePlayer
-
-from otree_redwood.models import Event
+from otree.models import BaseSubsession, BasePlayer
+from otree_redwood.models import Event, ContinuousDecisionGroup
+from otree_redwood.utils import DiscreteEventEmitter
 
 doc = """
 Two-by-two game with stochastic transitions between payoff matrices.
 """
 
 
-# from .test_payoff import fill_events
-# do_test = False
+class UndefinedTreatmentError(ValueError):
+    pass
 
-# if
+
+def treatment(session):
+    if 'treatment' in session.config:
+        return Constants.treatments[session.config['treatment']]
+    else:
+        raise UndefinedTreatmentError('no treatment attribute in settings.py')
 
 
 class Constants(BaseConstants):
@@ -75,8 +80,46 @@ class Subsession(BaseSubsession):
         self.group_randomly()
 
 
-class Group(BaseGroup):
-    pass
+class Group(ContinuousDecisionGroup):
+
+    current_matrix = models.PositiveIntegerField()
+    
+    def period_length(self):
+        return Constants.period_length
+
+    def initial_decision(self):
+        return 0.5
+
+    def when_all_players_ready(self):
+        super().when_all_players_ready()
+        self.current_matrix = random.choice([0, 1])
+        self.save()
+        self.emitter = DiscreteEventEmitter(0.1, self.period_length(), self, self.tick)
+        self.emitter.start()
+
+    def tick(self, current_interval, intervals, group):
+        q1, q2 = list(self.group_decisions.values()) # decisions
+        p11, p12, p21, p22 = [pij[self.current_matrix] for pij in treatment(self.session)['transition_probabilities']] # transition probabilities
+        # probability of a switch in 2 seconds = 1/2
+        # solved by P(switch in t) = (1-p)^10t = 1/2
+        Pmax = .034064
+        Pswitch = (p11 * q1 * q2 +
+                   p12 * q1 * (1 - q2) +
+                   p21 * (1 - q1) * q2 +
+                   p22 * (1 - q1) * (1 - q2)) * Pmax
+
+        if random.uniform(0, 1) < .1:
+            print(Pswitch, list(self.group_decisions.values()), self.current_matrix)
+
+        if random.uniform(0, 1) < Pswitch:
+            self.current_matrix = 1 - self.current_matrix
+            print(str.format('matrix changed with q1={}, q2={}, P={}', q1, q2, Pswitch))
+            Event.objects.create(
+                group=self,
+                channel='transitions',
+                value=self.current_matrix)
+            self.save()
+            self.send(self.group, 'current_matrix', self.current_matrix)
 
 
 class Player(BasePlayer):
