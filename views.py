@@ -32,7 +32,7 @@ class Results(Page):
     timeout_seconds = 30
     
     def vars_for_template(self):
-        self.player.set_payoff(Decision.initial_decision)
+        self.player.set_payoff()
 
         return {
             'total_plus_base': self.player.payoff + Constants.base_points

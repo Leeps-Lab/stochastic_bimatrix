@@ -127,7 +127,7 @@ class Player(BasePlayer):
     def other_player(self):
         return self.get_others_in_group()[0]
 
-    def set_payoff(self, initial_decision):
+    def set_payoff(self):
         events_over_time = Event.objects.filter(
             content_type=ContentType.objects.get_for_model(self.group),
             group_pk=self.group.pk)
