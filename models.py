@@ -119,7 +119,7 @@ class Group(ContinuousDecisionGroup):
                 channel='transitions',
                 value=self.current_matrix)
             self.save()
-            self.send(self.group, 'current_matrix', self.current_matrix)
+            self.send('current_matrix', self.current_matrix)
 
 
 class Player(BasePlayer):
