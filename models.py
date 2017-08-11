@@ -108,16 +108,8 @@ class Group(ContinuousDecisionGroup):
                    p21 * (1 - q1) * q2 +
                    p22 * (1 - q1) * (1 - q2)) * Pmax
 
-        if random.uniform(0, 1) < .1:
-            print(Pswitch, list(self.group_decisions.values()), self.current_matrix)
-
         if random.uniform(0, 1) < Pswitch:
             self.current_matrix = 1 - self.current_matrix
-            print(str.format('matrix changed with q1={}, q2={}, P={}', q1, q2, Pswitch))
-            Event.objects.create(
-                group=self,
-                channel='transitions',
-                value=self.current_matrix)
             self.save()
             self.send('current_matrix', self.current_matrix)
 
@@ -137,7 +129,7 @@ class Player(BasePlayer):
 
         useful_events_over_time = [
             event for event in events_over_time
-            if event.channel == 'decisions' or event.channel == 'transitions'
+            if event.channel == 'decisions' or event.channel == 'current_matrix'
         ]
 
         period_start = Event.objects.get(
@@ -171,7 +163,7 @@ def get_payoff(period_start, period_end, events_over_time, id_in_group, particip
     current_matrix = 0
 
     for i, change in enumerate(events_over_time):
-        if change.channel == 'transitions':
+        if change.channel == 'current_matrix':
             current_matrix = change.value
         elif change.channel == 'decisions':
             # decision was made by me and my id is 1, or decision was made by opponent and my id is 2

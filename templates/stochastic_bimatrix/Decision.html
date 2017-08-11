@@ -15,6 +15,7 @@
          oTree.participantCode = "{{ player.participant.code }}";
          oTree.appName = "{{ subsession.app_name }}";
          oTree.idInGroup = "{{ player.id_in_group }}";
+         oTree.csrfToken = "{{csrf_token}}";
          {% if view.is_debug %}
          oTree.debug = true;
          {% else %}

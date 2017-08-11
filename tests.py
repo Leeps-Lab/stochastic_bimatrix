@@ -42,7 +42,7 @@ def test_get_payoff():
  
     events_over_time.append(MockEvent('decisions', 0.8, p2, start+timezone.timedelta(seconds=5)))
     events_over_time.append(MockEvent('decisions', 0.9, p1, start+timezone.timedelta(seconds=10)))
-    events_over_time.append(MockEvent('transitions', 1, None, start+timezone.timedelta(seconds=12)))
+    events_over_time.append(MockEvent('current_matrix', 1, None, start+timezone.timedelta(seconds=12)))
     events_over_time.append(MockEvent('decisions', 0.4, p1, start+timezone.timedelta(seconds=18)))
     events_over_time.append(MockEvent('decisions', 0.7, p1, start+timezone.timedelta(seconds=20)))
 
