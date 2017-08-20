@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <script 
+        src="/static/bower_components/webcomponentsjs/webcomponents-lite.min.js">
+    </script>
+    <link
+        rel="import"
+        href="/static/webcomponents/app/stochastic-bimatrix/stochastic-bimatrix.html">
+    <link
+        rel="import"
+        href="/static/otree-redwood/webcomponents/otree-redwood-debug/otree-redwood-debug.html">
+    <link
+        rel="stylesheet"
+        href="/static/bootstrap/css/bootstrap.min.css">
+  </head>
+  <body>
+    <script src="//code.highcharts.com/highcharts.js"></script>
+    <script src="/static/otree/js/jquery.min.js"></script>
+    <script src="/static/bootstrap/js/bootstrap.min.js"></script>
+    <script>
+        var oTree = oTree || {};
+        (function() {
+            oTree.group = 1;
+            oTree.role = 'demo';
+            oTree.participantCode = 'demo';
+            oTree.appName = "stochastic-bimatrix";
+            oTree.idInGroup = 1;
+            oTree.debug = true;
+        })();
+    </script>
+    <stochastic-bimatrix
+        payoff-matrices="[[
+            [ 100, 800 ], [ 100, 200 ],
+            [   0, 200 ], [   0,   0 ]
+        ],
+        [
+            [ 800,   0 ], [   0, 200 ],
+            [   0, 200 ], [ 200,   0 ]
+        ]]"
+        transition-probabilities="[
+            [   1,   0 ], [   0.8,   0 ],
+            [   0,   0 ], [   0.8,   1 ]
+        ]"
+        period-length="120">
+    </stochastic-bimatrix>
+    <otree-redwood-debug></otree-redwood-debug>
+  </body>
+</html>

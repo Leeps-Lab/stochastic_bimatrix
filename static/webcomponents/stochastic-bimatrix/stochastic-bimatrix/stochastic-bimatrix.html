@@ -1,4 +1,5 @@
 <link rel="import" href="/static/bower_components/polymer/polymer.html">
+<link rel="import" href="/static/bower_components/iron-flex-layout/iron-flex-layout-classes.html">
 
 <link rel="import" href="/static/otree-redwood/webcomponents/otree-constants/otree-constants.html">
 <link rel="import" href="/static/otree-redwood/webcomponents/otree-continuous-decision/otree-continuous-decision.html">
@@ -11,21 +12,31 @@
 <link rel="import" href="/static/webcomponents/stochastic-bimatrix/otree-thermometer/otree-thermometer.html">
 <link rel="import" href="/static/webcomponents/stochastic-bimatrix/payoff-graph/payoff-graph.html">
 <link rel="import" href="/static/webcomponents/stochastic-bimatrix/matrix-transition/matrix-transition.html">
+<link rel="import" href="/static/webcomponents/stochastic-bimatrix/styled-range/styled-range.html">
+
 
 <dom-module id="stochastic-bimatrix">
     <template>
+        <style include="iron-flex iron-flex-alignment"></style>
         <style>
             :host { margin: 10px; }
 
-            #slider {
-                writing-mode: bt-lr; /* IE */
-                -webkit-appearance: slider-vertical; /* WebKit */
-                width: 8px;
-                height: 310px;
+            styled-range {
+                transform: rotate(270deg) translateX(-100%);
+                transform-origin: 0 0px;
+                width: 315px;
+                height: 50px;
+            }
+
+            .slider-container {
+                width: 50px;
+                height: 315px;
+                position: relative;
+                top: 10px;
             }
 
             .rotate {
-                 -webkit-transform: rotate(360deg);
+                -webkit-transform: rotate(360deg);
                 -moz-transform: rotate(360deg);
                 -o-transform: rotate(360deg);
                 -ms-transform: rotate(360deg); 
@@ -33,9 +44,20 @@
                 transition-duration:0.4s;
             }
 
-            hazard-iso {
-                margin-right: 30px;
-                /* margin-top: -25px; */
+            hazard-bar{
+                margin: 0 15px 0 15px;
+            }
+
+            #row1 {
+                margin-bottom: 50px;
+            }
+
+            #possible-heatmaps {
+                margin-right: 50px;
+            }
+
+            #current-hazard-heatmap {
+                margin-left: 50px;
             }
 
         </style>
@@ -59,13 +81,13 @@
             current-matrix="{{ currentMatrix }}">
         </matrix-transition>
 
-        <div>
-            <div style="height: 250px; margin-bottom:30px">
-                <div style="float:left">
-                    <div style="height:50px;text-align:center;padding-top:25px;font-size:20px">
-                        Switch
+        <div class="layout vertical" style="margin: 20px">
+            <div id="row1" class="layout horizontal center">
+                <div id="possible-heatmaps" class="layout vertical center">
+                    <div class="layout horizontal center">
+                        <span>Switch</span>
                     </div>
-                    <div style="display:inline-block;margin-right:20px">
+                    <div class="layout horizontal center">
                         <stochastic-heatmap
                             id="heatmap-P1-B"
                             size="120"
@@ -75,11 +97,7 @@
                             probabilities='[[ probabilities_B ]]'
                             color='[[ inactiveColor ]]'
                         ></stochastic-heatmap>
-                    </div>
-                    <div style="display:inline-block">
                         <hazard-bar hazard-rate="[[ hazardRate ]]"></hazard-bar>
-                    </div>
-                    <div style="display:inline-block;margin-left:20px">
                         <stochastic-heatmap
                             id="heatmap-P2-B"
                             size="120"
@@ -91,83 +109,70 @@
                         ></stochastic-heatmap>
                     </div>
                 </div>
-                <div style="float:right">
-                    <div style="display:inline-block">
-                        <div style="position:relative;bottom:23px">
-                            <otree-thermometer color="rainbow"></otree-thermometer>
-                        </div>
-                    </div>
-                    <div style="display:inline-block">
-                        <payoff-graph
-                            style="height: 250px"
-                            my-decision='[[ myDecision ]]'
-                            other-decision='[[ otherDecision ]]'
-                            my-payoffs='[[ myPayoffs_A ]]'
-                            other-payoffs='[[ otherPayoffs_A ]]'
-                            period-length='120'
-                        ></payoff-graph>
-                    </div>
+                <div class="layout horizontal center">
+                    <otree-thermometer
+                        color="rainbow"
+                        style="height: 185px; position: relative; top: 5px"
+                    ></otree-thermometer>
+                    <payoff-graph
+                        style="height: 250px"
+                        my-decision='[[ myDecision ]]'
+                        other-decision='[[ otherDecision ]]'
+                        my-payoffs='[[ myPayoffs_A ]]'
+                        other-payoffs='[[ otherPayoffs_A ]]'
+                        period-length='120'
+                    ></payoff-graph>
                 </div>
             </div>
-            <div style="height: 400px">
-                <div style="float:left">
-                    <div style="display:inline-block">
-                        <stochastic-heatmap
-                            id="heatmap-P2-A"
-                            size="300"
-                            my-decision='[[ myDecision ]]'
-                            other-decision='[[ otherDecision ]]'
-                            payoffs='[[ myPayoffs_A ]]'
-                            probabilities='[[ probabilities_A ]]'
-                            color='[[ myColor ]]'
-                        ></stochastic-heatmap>
-                        <div style="margin-top:10px; text-align:center">Your Payoff</div>
-                    </div>
-                    <div style="display:inline-block; margin-left:20px; margin-right:20px">
-                        <div style="position:relative; bottom:35px">
-                            <input
-                                id="slider"
-                                type="range"
-                                min="0"
-                                max="1"
-                                step=".01"
-                                disabled$="[[ !_isPeriodRunning ]]"
-                                value="{{ myDecision::change }}">
-                        </div>
-                    </div>
-                    <div style="display:inline-block">
-                        <stochastic-heatmap
-                            id="heatmap-P1-A"
-                            size="300"
-                            my-decision='[[ myDecision ]]'
-                            other-decision='[[ otherDecision ]]'
-                            payoffs='[[ otherPayoffs_A ]]'
-                            probabilities='[[ probabilities_A ]]'
-                            color='[[ otherColor ]]'
-                        ></stochastic-heatmap>
-                        <div style="margin-top:10px; text-align:center">Other Player</div>
-                    </div>
+            <div id="row2" class="layout horizontal center">
+                <div class="layout vertical center">
+                    <span>Your Payoff</span>
+                    <stochastic-heatmap
+                        id="heatmap-P2-A"
+                        size="300"
+                        my-decision='[[ myDecision ]]'
+                        other-decision='[[ otherDecision ]]'
+                        payoffs='[[ myPayoffs_A ]]'
+                        probabilities='[[ probabilities_A ]]'
+                        color='[[ myColor ]]'
+                    ></stochastic-heatmap>
                 </div>
-                <div style="float:right">
-                    <div style="width: 250px">
-                        <!-- <h3>Text Instructions</h3>
-                        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum</p> -->
-                        <h3>Hazard Rate Heatmap</h3>
-                        <div style="float:right">
-                            <hazard-iso
-                                size="200"
-                                my-decision='[[ myDecision ]]'
-                                other-decision='[[ otherDecision ]]'
-                                probabilities='[[ probabilities_A ]]'
-                                color='[[ hazardColor ]]'
-                            ></hazard-iso>
-                        </div>
-                        <div style="float:right;">
-                            More saturated areas have higher transition probability.
-                        </div>
-                    </div>
+                <div class="slider-container">
+                    <styled-range
+                        min="0"
+                        max="1"
+                        step="0.1"
+                        disabled="[[ !_isPeriodRunning ]]"
+                        value="{{ myDecision }}">
+                    </styled-range>
+                </div>
+                <div class="layout vertical center">
+                    <span>Other Player</span>
+                    <stochastic-heatmap
+                        id="heatmap-P1-A"
+                        size="300"
+                        my-decision='[[ myDecision ]]'
+                        other-decision='[[ otherDecision ]]'
+                        payoffs='[[ otherPayoffs_A ]]'
+                        probabilities='[[ probabilities_A ]]'
+                        color='[[ otherColor ]]'
+                    ></stochastic-heatmap>
+                </div>
+                <div id="current-hazard-heatmap" class="layout vertical center">
+                    <span>Hazard Rate Heatmap</span>
+                    <hazard-iso
+                        size="200"
+                        my-decision='[[ myDecision ]]'
+                        other-decision='[[ otherDecision ]]'
+                        probabilities='[[ probabilities_A ]]'
+                        color='[[ hazardColor ]]'
+                    ></hazard-iso>
+                    <span>
+                        More saturated areas have higher transition probability.
+                    </span>
                 </div>
             </div>
+        </div>
     </template>
 
     <script src="/static/general/color.js"></script>
