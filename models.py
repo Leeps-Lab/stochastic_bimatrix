@@ -97,7 +97,7 @@ class Group(ContinuousDecisionGroup):
         self.emitter = DiscreteEventEmitter(0.1, self.period_length(), self, self.tick)
         self.emitter.start()
 
-    def tick(self, current_interval, intervals, group):
+    def tick(self, current_interval, intervals):
         q1, q2 = list(self.group_decisions.values()) # decisions
         p11, p12, p21, p22 = [pij[self.current_matrix] for pij in treatment(self.session)['transition_probabilities']] # transition probabilities
         # probability of a switch in 2 seconds = 1/2
