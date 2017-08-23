@@ -95,6 +95,8 @@
                             other-decision='[[ otherDecision ]]'
                             payoffs='[[ myPayoffs_B ]]'
                             probabilities='[[ probabilities_B ]]'
+                            payoff-min='[[ _payoffMin ]]'
+                            payoff-max='[[ _payoffMax ]]'
                             color='[[ inactiveColor ]]'
                         ></stochastic-heatmap>
                         <hazard-bar hazard-rate="[[ hazardRate ]]"></hazard-bar>
@@ -105,6 +107,8 @@
                             other-decision='[[ otherDecision ]]'
                             payoffs='[[ otherPayoffs_B ]]'
                             probabilities='[[ probabilities_B ]]'
+                            payoff-min='[[ _payoffMin ]]'
+                            payoff-max='[[ _payoffMax ]]'
                             color='[[ inactiveColor ]]'
                         ></stochastic-heatmap>
                     </div>
@@ -121,6 +125,8 @@
                         my-payoffs='[[ myPayoffs_A ]]'
                         other-payoffs='[[ otherPayoffs_A ]]'
                         period-length='120'
+                        payoff-min='[[ _payoffMin ]]'
+                        payoff-max='[[ _payoffMax ]]'
                     ></payoff-graph>
                 </div>
             </div>
@@ -135,6 +141,8 @@
                         payoffs='[[ myPayoffs_A ]]'
                         probabilities='[[ probabilities_A ]]'
                         color='[[ myColor ]]'
+                        payoff-min='[[ _payoffMin ]]'
+                        payoff-max='[[ _payoffMax ]]'
                     ></stochastic-heatmap>
                 </div>
                 <div class="slider-container">
@@ -156,6 +164,8 @@
                         payoffs='[[ otherPayoffs_A ]]'
                         probabilities='[[ probabilities_A ]]'
                         color='[[ otherColor ]]'
+                        payoff-min='[[ _payoffMin ]]'
+                        payoff-max='[[ _payoffMax ]]'
                     ></stochastic-heatmap>
                 </div>
                 <div id="current-hazard-heatmap" class="layout vertical center">
@@ -195,6 +205,12 @@
                 currentMatrix: {
                     type: Number,
                     observer: '_handleMatrixTransition',
+                },
+                _payoffMin: {
+                    computed: '_computePayoffMin(payoffMatrices.*)',
+                },
+                _payoffMax: {
+                    computed: '_computePayoffMax(payoffMatrices.*)',
                 },
                 // set by otree-period
                 _isPeriodRunning: {
@@ -293,6 +309,28 @@
                     p21 * (1 - q1) * q2 +
                     p22 * (1 - q1) * (1 - q2);
                 // console.log('calchazardrate='+this.hazardRate);
+            },
+            _computePayoffMin(a) {
+                let min = Infinity;
+                for (let matrix of a.value) {
+                    for (let row of matrix) {
+                        for (let value of row) {
+                            min = Math.min(min, value);
+                        }
+                    }
+                }
+                return min;
+            },
+            _computePayoffMax(a) {
+                let max = -Infinity;
+                for (let matrix of a.value) {
+                    for (let row of matrix) {
+                        for (let value of row) {
+                            max = Math.max(max, value);
+                        }
+                    }
+                }
+                return max;
             },
             _handleDecisionChanged() {
                 this._calcHazardRate();

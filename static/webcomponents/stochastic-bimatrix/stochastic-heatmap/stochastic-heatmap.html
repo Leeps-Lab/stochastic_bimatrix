@@ -96,6 +96,14 @@
 					type: String,
 					// observer: 'make_heatmap',
 				},
+				payoffMin: {
+					type: Number,
+				},
+				payoffMax: {
+					type: Number,
+				},
+			},
+			attached() {
 			},
 			// format a decision as a CSS percent value
 			_calcPercent(decision) {
@@ -105,28 +113,30 @@
 				return change.base[index]
 			},
 			make_heatmap() {
-				if (!this.color || !this.payoffs)
+				if (!this.color || !this.payoffs) {
 					return
-				const canvas = this.$.canvas
-				const w = canvas.width
-				const h = canvas.height
-				const ctx = canvas.getContext('2d')
+				}
+				const canvas = this.$.canvas;
+				const w = canvas.width;
+				const h = canvas.height;
+				const ctx = canvas.getContext('2d');
 				
-				const max_payoff = Math.max(... this.payoffs)
+				const min_payoff = this.payoffMin === undefined ? Math.min(... this.payoffs) : this.payoffMin;
+				const max_payoff = this.payoffMax === undefined ? Math.max(... this.payoffs) : this.payoffMax;
 
 				// create empty imageData object
-				const imageData = ctx.createImageData(w, h)
-				const data = imageData.data
+				const imageData = ctx.createImageData(w, h);
+				const data = imageData.data;
 
 				// iterate through every pixel in the image in row major order
 				for (let row = 0; row < h; row++) {
 					// calculate percent distance from bottom and top of image
-					const percent_bottom = row / h
-					const percent_top = 1 - percent_bottom
+					const percent_bottom = row / h;
+					const percent_top = 1 - percent_bottom;
 					for (let col = 0; col < w; col++) {
 						// calculate percent distance from left and right of image
-						const percent_right = col / w
-						const percent_left = 1 - percent_right
+						const percent_right = col / w;
+						const percent_left = 1 - percent_right;
 
 						// calculate the payoff at each pixel by weighting the payoff at each corner by its distance from the pixel
 						const point_payoff = Math.floor(
@@ -134,24 +144,24 @@
 							(percent_top * percent_right * this.payoffs[1]) +
 							(percent_bottom * percent_left * this.payoffs[2]) +
 							(percent_bottom * percent_right * this.payoffs[3])
-						)
+						);
 
 						// divide the payoff by the max payoff to get an color intensity percentage
 						// use get_gradient_color to get the appropriate color in the gradient for that percentage
-						const point_color = get_gradient_color(point_payoff / max_payoff, this.color)
+						const point_color = get_gradient_color((point_payoff - min_payoff) / (max_payoff - min_payoff), this.color);
 						// if (col == 5) console.log(point_payoff, max_payoff);
 
 						// set imageData for this pixel to the calculated color
-						const index = (row * w * 4) + (col * 4)
-						data[index] = point_color[0]
-						data[index + 1] = point_color[1]
-						data[index + 2] = point_color[2]
+						const index = (row * w * 4) + (col * 4);
+						data[index] = point_color[0];
+						data[index + 1] = point_color[1];
+						data[index + 2] = point_color[2];
 						// set alpha channel to fully opaque
-						data[index + 3] = 255
+						data[index + 3] = 255;
 					}
 				}
 
-				ctx.putImageData(imageData, 0, 0)
+				ctx.putImageData(imageData, 0, 0);
 			},
 		})
 	</script>
