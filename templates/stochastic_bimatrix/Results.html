@@ -9,16 +9,12 @@
 
     <table class="table" style="width:400px; margin-top:20px; margin-bottom:10px">
         <tr>
-            <td>You earned</td>
-            <td>{{ player.payoff }}</td>
+            <td>This round, you earned</td>
+            <td>{{ player.payoff }} points</td>
         </tr>
         <tr>
-            <td>In addition, you get a participation fee of</td>
-            <td>{{ Constants.base_points }}</td>
-        </tr>
-        <tr>
-            <td>In total, you receive</td>
-            <td>{{ total_plus_base }}</td>
+            <td>In total, you have earned</td>
+            <td>{{ player.participant.payoff }} points</td>
         </tr>
     </table>
 

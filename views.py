@@ -33,10 +33,7 @@ class Results(Page):
     
     def vars_for_template(self):
         self.player.set_payoff()
-
-        return {
-            'total_plus_base': self.player.payoff + Constants.base_points
-        }
+        return {}
 
 
 def get_output_table(events):
