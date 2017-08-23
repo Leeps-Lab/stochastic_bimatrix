@@ -146,10 +146,11 @@
 							(percent_bottom * percent_right * this.payoffs[3])
 						);
 
-						// divide the payoff by the max payoff to get an color intensity percentage
+						// linearly interpolate the payoff between max payoff and min payoff
+						// to get an color intensity percentage
 						// use get_gradient_color to get the appropriate color in the gradient for that percentage
-						const point_color = get_gradient_color((point_payoff - min_payoff) / (max_payoff - min_payoff), this.color);
-						// if (col == 5) console.log(point_payoff, max_payoff);
+						const point_color = get_gradient_color(
+							(point_payoff - min_payoff) / (max_payoff - min_payoff), this.color);
 
 						// set imageData for this pixel to the calculated color
 						const index = (row * w * 4) + (col * 4);
