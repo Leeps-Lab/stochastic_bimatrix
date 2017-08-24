@@ -14,7 +14,6 @@ def vars_for_all_templates(self):
 
 
 class Introduction(Page):
-    timeout_seconds = 100
 
     def is_displayed(self):
         return self.round_number == 1
