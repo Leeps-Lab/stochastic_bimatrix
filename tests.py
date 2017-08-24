@@ -1,4 +1,9 @@
 from collections import namedtuple
+from selenium import webdriver
+from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.ui import WebDriverWait
+
 
 from otree.api import Bot, Submission
 from . import views
@@ -9,6 +14,15 @@ class PlayerBot(Bot):
     def play_round(self):
         if self.player.round_number == 1:
             yield views.Introduction
+        '''
+        driver = webdriver.Remote(
+            command_executor='http://chromedriver:4444/wd/hub',
+            desired_capabilities=DesiredCapabilities.CHROME)
+        driver.get('http://localhost:8000/InitializeParticipant/{}/'.format(self.participant.code))
+        wait = WebDriverWait(driver, 30)
+        wait.until(EC.url_contains('Decision'))
+        driver.close()
+        '''
         yield Submission(views.Decision, {}, check_html=False)
         test_get_payoff()
         yield views.Results
@@ -59,15 +73,14 @@ def test_get_payoff():
         ]
     ]
 
-    print('RUNNING GET_PAYOFF FOR PLAYER 1 ----------------------------------------------')
     payoff1 = models.get_payoff(period_start, period_end, events_over_time, 1, p1.code, payoff_grids)
-
-    print('RUNNING GET_PAYOFF FOR PLAYER 2 ----------------------------------------------')
     payoff2 = models.get_payoff(period_start, period_end, events_over_time, 2, p2.code, payoff_grids)
 
-    print('RESULTS ----------------------------------------------------------------------')
     assert 0 <= payoff1 and payoff1 <= 800
     assert 0 <= payoff2 and payoff2 <= 800
     assert abs(payoff1 - 448) < 1
     assert abs(payoff2 - 90) < 1
-    print(payoff1, payoff2)
+
+    sess.delete()
+    p1.delete()
+    p2.delete()

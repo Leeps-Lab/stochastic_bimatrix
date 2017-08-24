@@ -173,10 +173,8 @@ def get_payoff(period_start, period_end, events_over_time, id_in_group, particip
             # decision was made by me and my id is 1, or decision was made by opponent and my id is 2
             if (change.participant.code == participant_code) is (id_in_group == 1):
                 q1 = change.value
-                print('q1={}'.format(change.value))
             else:
                 q2 = change.value
-                print('q2={}'.format(change.value))
 
         payoff_grid = [payoff[id_in_group - 1] for payoff in payoff_grids[current_matrix]]
 
