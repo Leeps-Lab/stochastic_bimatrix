@@ -139,7 +139,7 @@
 						const percent_left = 1 - percent_right;
 
 						// calculate the payoff at each pixel by weighting the payoff at each corner by its distance from the pixel
-						const point_payoff = Math.floor(
+						const point_payoff = (
 							(percent_top * percent_left * this.payoffs[0]) +
 							(percent_top * percent_right * this.payoffs[1]) +
 							(percent_bottom * percent_left * this.payoffs[2]) +
