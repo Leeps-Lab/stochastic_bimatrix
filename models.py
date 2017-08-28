@@ -111,6 +111,9 @@ class Group(ContinuousDecisionGroup):
                 p22 * (1 - q1) * (1 - q2)) * Pmax
 
     def tick(self, current_interval, intervals):
+        # TODO: Integrate into the otree-redwood DiscreteEventEmitter API, because otherwise
+        # someone will forget this and get very confused when the tick functions use stale data.
+        self.refresh_from_db()
         q1, q2 = list(self.group_decisions.values()) # decisions
         if random.uniform(0, 1) < self.pswitch(q1, q2):
             self.current_matrix = 1 - self.current_matrix
@@ -147,11 +150,9 @@ class Player(BasePlayer):
                 group_pk=self.group.pk,
                 value='period_end')
 
-        self.payoff = get_payoff(
+        self.payoff = self.get_payoff(
             period_start, period_end,
             useful_events_over_time,
-            self.id_in_group,
-            self.participant.code,
             Constants.treatments[self.session.config['treatment']]['payoff_grid']
         )
 
