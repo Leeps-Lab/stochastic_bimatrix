@@ -130,9 +130,9 @@
                         style="height: 250px"
                         my-decision='[[ myDecision ]]'
                         other-decision='[[ otherDecision ]]'
-                        my-payoffs='[[ myPayoffs_A ]]'
-                        other-payoffs='[[ otherPayoffs_A ]]'
-                        period-length='120'
+                        my-payoffs='[[ _myCurrentPayoffs ]]'
+                        other-payoffs='[[ _otherCurrentPayoffs ]]'
+                        period-length='[[ periodLength ]]'
                         payoff-min='[[ _payoffMin ]]'
                         payoff-max='[[ _payoffMax ]]'
                     ></payoff-graph>
@@ -197,7 +197,7 @@
                         size="150"
                         my-decision='[[ myDecision ]]'
                         other-decision='[[ otherDecision ]]'
-                        payoffs='[[ otherPayoffs_A ]]'
+                        payoffs='[[ otherPayoffs_B ]]'
                         probabilities='[[ probabilities_A ]]'
                         color='[[ _otherColorB ]]'
                         payoff-min='[[ _payoffMin ]]'
@@ -239,6 +239,12 @@
                 _isPeriodRunning: {
                     type: Boolean
                 },
+                _myCurrentPayoffs: {
+                    computed: '_computeCurrentPayoffs(payoffMatrices.*, currentMatrix, 0)',
+                },
+                _otherCurrentPayoffs: {
+                    computed: '_computeCurrentPayoffs(payoffMatrices.*, currentMatrix, 1)',
+                },
                 _hazardColorA: {
                     computed: '_computeColor(currentMatrix, "red", "gray")',
                 },
@@ -246,16 +252,16 @@
                     computed: '_computeColor(currentMatrix, "gray", "red")',
                 },
                 _myColorA: {
-                    computed: '_computeColor(currentMatrix, "rainbow", "gray")',
+                    computed: '_computeColor(currentMatrix, "rainbow2", "gray")',
                 },
                 _myColorB: {
-                    computed: '_computeColor(currentMatrix, "gray", "rainbow")',
+                    computed: '_computeColor(currentMatrix, "gray", "rainbow2")',
                 },
                 _otherColorA: {
-                    computed: '_computeColor(currentMatrix, "rainbow", "gray")',
+                    computed: '_computeColor(currentMatrix, "rainbow2", "gray")',
                 },
                 _otherColorB: {
-                    computed: '_computeColor(currentMatrix, "gray", "rainbow")',
+                    computed: '_computeColor(currentMatrix, "gray", "rainbow2")',
                 },
             },
             ready() {
@@ -330,14 +336,35 @@
                 const p12 = this.transitionProbabilities[1][this.currentMatrix];
                 const p21 = this.transitionProbabilities[2][this.currentMatrix];
                 const p22 = this.transitionProbabilities[3][this.currentMatrix];
-                const q1 = this.myDecision;
-                const q2 = this.otherDecision;
+                let q1;
+                let q2;
+                if (this.$.constants.idInGroup == 1) {
+                    q1 = this.myDecision;
+                    q2 = this.otherDecision;
+                } else {
+                    q2 = this.myDecision;
+                    q1 = this.otherDecision;
+                }
                 this.hazardRate =
                     p11 * q1 * q2 +
                     p12 * q1 * (1 - q2) +
                     p21 * (1 - q1) * q2 +
                     p22 * (1 - q1) * (1 - q2);
-                // console.log('calchazardrate='+this.hazardRate);
+            },
+            _computeCurrentPayoffs(payoffMatrices, currentMatrix, playerIndex) {
+                this._calcPayoffs();
+                if (currentMatrix == 0 && playerIndex == 0) {
+                    return this.myPayoffs_A;
+                }
+                if (currentMatrix == 0 && playerIndex == 1) {
+                    return this.otherPayoffs_A;
+                }
+                if (currentMatrix == 1 && playerIndex == 0) {
+                    return this.myPayoffs_B;
+                }
+                if (currentMatrix == 1 && playerIndex == 1) {
+                    return this.otherPayoffs_B;
+                }
             },
             _computePayoffMin(a) {
                 let min = Infinity;
