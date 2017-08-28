@@ -373,16 +373,6 @@
             _handleMatrixTransition() {
                 this._calcPayoffs();
                 this._calcHazardRate();
-                /*
-                // do transition animation if past initialization
-                if (this.doneInitialTransition) {
-                    const heatmaps = document.querySelectorAll('stochastic-heatmap');
-                    $(heatmaps).removeClass('rotate');
-                    setTimeout(() => $(heatmaps).addClass('rotate'), 1);
-                } else {
-                    this.doneInitialTransition = true;
-                }
-                */
             },
         })
     </script>
