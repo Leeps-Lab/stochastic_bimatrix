@@ -60,7 +60,7 @@ def test_get_payoff():
     events_over_time.append(MockEvent('decisions', 0.4, p1, start+timezone.timedelta(seconds=18)))
     events_over_time.append(MockEvent('decisions', 0.7, p1, start+timezone.timedelta(seconds=20)))
 
-    period_end = MockEvent('state', 'period_end', p1, start+timezone.timedelta(seconds=models.Constants.period_length))
+    period_end = MockEvent('state', 'period_end', p1, start+timezone.timedelta(seconds=30))
 
     payoff_grids = [
         [
@@ -85,5 +85,5 @@ def test_get_payoff():
 
     assert 0 <= payoff1 and payoff1 <= 800
     assert 0 <= payoff2 and payoff2 <= 800
-    assert abs(payoff1 - 448) < 1
-    assert abs(payoff2 - 90) < 1
+    assert abs(payoff1 - 412) < 1
+    assert abs(payoff2 - 133) < 1

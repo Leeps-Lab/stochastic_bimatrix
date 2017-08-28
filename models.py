@@ -179,21 +179,17 @@ class Player(BasePlayer):
                 else: # column player sets q2
                     q2 = change.value
 
-            payoff_grid = [payoff[self.id_in_group - 1] for payoff in payoff_grids[current_matrix]]
-
-            cur_payoff = (
-                payoff_grid[0] * q1 * q2 +
-                payoff_grid[1] * q1 * (1 - q2) +
-                payoff_grid[2] * (1 - q1) * q2 +
-                payoff_grid[3] * (1 - q1) * (1 - q2))
+            flow_payoff = (
+                payoff_grids[current_matrix][0][self.id_in_group - 1] * q1 * q2 +
+                payoff_grids[current_matrix][1][self.id_in_group - 1] * q1 * (1 - q2) +
+                payoff_grids[current_matrix][2][self.id_in_group - 1] * (1 - q1) * q2 +
+                payoff_grids[current_matrix][3][self.id_in_group - 1] * (1 - q1) * (1 - q2))
 
             if i + 1 < len(events_over_time):
                 next_change_time = events_over_time[i + 1].timestamp
             else:
                 next_change_time = period_end.timestamp
 
-            time_diff = (next_change_time - change.timestamp).total_seconds()
+            payoff += (next_change_time - change.timestamp).total_seconds() * flow_payoff
 
-            payoff += time_diff * cur_payoff
-
-        return payoff / Constants.period_length
+        return payoff / period_duration.total_seconds() 
