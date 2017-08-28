@@ -44,8 +44,14 @@
                 transition-duration:0.4s;
             }
 
-            hazard-bar{
+            hazard-bar {
+                position: relative;
+                bottom: 13px;
                 margin: 0 15px 0 15px;
+            }
+
+            hazard-iso {
+                margin: 0 10px 0 10px;
             }
 
             #row1 {
@@ -56,8 +62,12 @@
                 margin-right: 50px;
             }
 
-            #current-hazard-heatmap {
-                margin-left: 50px;
+            #payoff-graph {
+                margin: 0 50px 0 50px;
+            }
+
+            stochastic-heatmap {
+                margin: 0 15px 0 15px;
             }
 
         </style>
@@ -83,37 +93,35 @@
 
         <div class="layout vertical" style="margin: 20px">
             <div id="row1" class="layout horizontal center">
-                <div id="possible-heatmaps" class="layout vertical center">
-                    <div class="layout horizontal center">
-                        <span>Switch</span>
+                <div id="hazard-heatmaps" class="layout vertical center">
+                    <div class="layout horizontal">
+                        <div class="layout vertical center">
+                            <span>Hazard A</span>
+                            <hazard-iso
+                                size="150"
+                                my-decision='[[ myDecision ]]'
+                                other-decision='[[ otherDecision ]]'
+                                probabilities='[[ probabilities_A ]]'
+                                color='[[ _hazardColorA ]]'
+                            ></hazard-iso>
+                        </div>
+                        <hazard-bar class="self-end" hazard-rate="[[ hazardRate ]]"></hazard-bar>
+                        <div class="layout vertical center">
+                            <span>Hazard B</span>
+                            <hazard-iso
+                                size="150"
+                                my-decision='[[ myDecision ]]'
+                                other-decision='[[ otherDecision ]]'
+                                probabilities='[[ probabilities_B ]]'
+                                color='[[ _hazardColorB ]]'
+                            ></hazard-iso>
+                        </div>
                     </div>
-                    <div class="layout horizontal center">
-                        <stochastic-heatmap
-                            id="heatmap-P1-B"
-                            size="120"
-                            my-decision='[[ myDecision ]]'
-                            other-decision='[[ otherDecision ]]'
-                            payoffs='[[ myPayoffs_B ]]'
-                            probabilities='[[ probabilities_B ]]'
-                            payoff-min='[[ _payoffMin ]]'
-                            payoff-max='[[ _payoffMax ]]'
-                            color='[[ inactiveColor ]]'
-                        ></stochastic-heatmap>
-                        <hazard-bar hazard-rate="[[ hazardRate ]]"></hazard-bar>
-                        <stochastic-heatmap
-                            id="heatmap-P2-B"
-                            size="120"
-                            my-decision='[[ myDecision ]]'
-                            other-decision='[[ otherDecision ]]'
-                            payoffs='[[ otherPayoffs_B ]]'
-                            probabilities='[[ probabilities_B ]]'
-                            payoff-min='[[ _payoffMin ]]'
-                            payoff-max='[[ _payoffMax ]]'
-                            color='[[ inactiveColor ]]'
-                        ></stochastic-heatmap>
-                    </div>
+                    <span>
+                        More saturated areas have higher transition probability.
+                    </span>
                 </div>
-                <div class="layout horizontal center">
+                <div id="payoff-graph" class="layout horizontal center">
                     <otree-thermometer
                         color="rainbow2"
                         style="height: 185px; position: relative; top: 5px"
@@ -131,16 +139,30 @@
                 </div>
             </div>
             <div id="row2" class="layout horizontal center">
-                <div class="layout vertical center">
-                    <span>Your Payoff</span>
+                <div class="layout vertical self-end">
+                    <span>Other Payoff A</span>
                     <stochastic-heatmap
-                        id="heatmap-P2-A"
+                        class="other"
+                        size="150"
+                        my-decision='[[ myDecision ]]'
+                        other-decision='[[ otherDecision ]]'
+                        payoffs='[[ otherPayoffs_A ]]'
+                        probabilities='[[ probabilities_A ]]'
+                        color='[[ _otherColorA ]]'
+                        payoff-min='[[ _payoffMin ]]'
+                        payoff-max='[[ _payoffMax ]]'
+                    ></stochastic-heatmap>
+                </div>
+                <div class="layout vertical center">
+                    <span>Your Payoff A</span>
+                    <stochastic-heatmap
+                        class="you"
                         size="300"
                         my-decision='[[ myDecision ]]'
                         other-decision='[[ otherDecision ]]'
                         payoffs='[[ myPayoffs_A ]]'
                         probabilities='[[ probabilities_A ]]'
-                        color='[[ myColor ]]'
+                        color='[[ _myColorA ]]'
                         payoff-min='[[ _payoffMin ]]'
                         payoff-max='[[ _payoffMax ]]'
                     ></stochastic-heatmap>
@@ -155,31 +177,32 @@
                     </styled-range>
                 </div>
                 <div class="layout vertical center">
-                    <span>Other Player</span>
+                    <span>Your Payoff B</span>
                     <stochastic-heatmap
-                        id="heatmap-P1-A"
+                        class="you"
                         size="300"
                         my-decision='[[ myDecision ]]'
                         other-decision='[[ otherDecision ]]'
-                        payoffs='[[ otherPayoffs_A ]]'
-                        probabilities='[[ probabilities_A ]]'
-                        color='[[ otherColor ]]'
+                        payoffs='[[ myPayoffs_B ]]'
+                        probabilities='[[ probabilities_B ]]'
+                        color='[[ _myColorB ]]'
                         payoff-min='[[ _payoffMin ]]'
                         payoff-max='[[ _payoffMax ]]'
                     ></stochastic-heatmap>
                 </div>
-                <div id="current-hazard-heatmap" class="layout vertical center">
-                    <span>Hazard Rate Heatmap</span>
-                    <hazard-iso
-                        size="200"
+                <div class="layout vertical self-end">
+                    <span>Other Payoff B</span>
+                    <stochastic-heatmap
+                        class="other"
+                        size="150"
                         my-decision='[[ myDecision ]]'
                         other-decision='[[ otherDecision ]]'
+                        payoffs='[[ otherPayoffs_A ]]'
                         probabilities='[[ probabilities_A ]]'
-                        color='[[ hazardColor ]]'
-                    ></hazard-iso>
-                    <span>
-                        More saturated areas have higher transition probability.
-                    </span>
+                        color='[[ _otherColorB ]]'
+                        payoff-min='[[ _payoffMin ]]'
+                        payoff-max='[[ _payoffMax ]]'
+                    ></stochastic-heatmap>
                 </div>
             </div>
         </div>
@@ -215,7 +238,25 @@
                 // set by otree-period
                 _isPeriodRunning: {
                     type: Boolean
-                }
+                },
+                _hazardColorA: {
+                    computed: '_computeColor(currentMatrix, "red", "gray")',
+                },
+                _hazardColorB: {
+                    computed: '_computeColor(currentMatrix, "gray", "red")',
+                },
+                _myColorA: {
+                    computed: '_computeColor(currentMatrix, "rainbow", "gray")',
+                },
+                _myColorB: {
+                    computed: '_computeColor(currentMatrix, "gray", "rainbow")',
+                },
+                _otherColorA: {
+                    computed: '_computeColor(currentMatrix, "rainbow", "gray")',
+                },
+                _otherColorB: {
+                    computed: '_computeColor(currentMatrix, "gray", "rainbow")',
+                },
             },
             ready() {
                 // set payoff indices
@@ -247,12 +288,6 @@
 
                 this.currentMatrix = 0;
 
-                // color schemes for each player's heatmaps
-                this.myColor = 'rainbow2';
-                this.otherColor = 'rainbow2';
-                this.hazardColor = 'red';
-                this.inactiveColor = 'gray';
-
                 this._calcPayoffs();
                 this._calcHazardRate();
 
@@ -272,26 +307,21 @@
                 // setTimeout(this._handleMatrixTransition.bind(this), 4000)
             },
             _calcPayoffs() {
-                // get two matrix indices
-                const index_A = this.currentMatrix;
-                const index_B = 1 - index_A;
-                // console.log(this.currentMatrix);
-
                 // get four payoff matrices
-                this.myPayoffs_A = this.payoffMatrices[index_A].map(
+                this.myPayoffs_A = this.payoffMatrices[0].map(
                     val => parseInt(val[this.payoffIndex]));
-                this.otherPayoffs_A = this.payoffMatrices[index_A].map(
+                this.otherPayoffs_A = this.payoffMatrices[0].map(
                     val => parseInt(val[this.otherPayoffIndex]));
-                this.myPayoffs_B = this.payoffMatrices[index_B].map(
+                this.myPayoffs_B = this.payoffMatrices[1].map(
                     val => parseInt(val[this.payoffIndex]));
-                this.otherPayoffs_B = this.payoffMatrices[index_B].map(
+                this.otherPayoffs_B = this.payoffMatrices[1].map(
                     val => parseInt(val[this.otherPayoffIndex]));
 
                 // turn transition probability matrix into two arrays
                 this.probabilities_A = this.transitionProbabilities.map(
-                    val => val[index_A]);
+                    val => val[0]);
                 this.probabilities_B = this.transitionProbabilities.map(
-                    val => val[index_B])
+                    val => val[1])
             },
             _calcHazardRate() {
                 if (this.currentMatrix == undefined || this.myDecision == undefined || this.otherDecision == undefined)
@@ -331,12 +361,19 @@
                 }
                 return max;
             },
+            _computeColor(currentMatrix, colorActive, colorInactive) {
+                if (currentMatrix == 0) {
+                    return colorActive;
+                }
+                return colorInactive;
+            },
             _handleDecisionChanged() {
                 this._calcHazardRate();
             },
             _handleMatrixTransition() {
                 this._calcPayoffs();
                 this._calcHazardRate();
+                /*
                 // do transition animation if past initialization
                 if (this.doneInitialTransition) {
                     const heatmaps = document.querySelectorAll('stochastic-heatmap');
@@ -345,6 +382,7 @@
                 } else {
                     this.doneInitialTransition = true;
                 }
+                */
             },
         })
     </script>
