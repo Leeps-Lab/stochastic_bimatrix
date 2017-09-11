@@ -160,7 +160,7 @@ class Player(BasePlayer):
         payoff = 0
 
         # defaults
-        q1, q2 = self.group.initial_decision(), self.group.initial_decision()
+        q1, q2 = 0.5, 0.5
         current_matrix = 0
         if self.id_in_group == 1:
             row_player = self.participant
