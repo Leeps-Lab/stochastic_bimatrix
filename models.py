@@ -87,9 +87,6 @@ class Group(ContinuousDecisionGroup):
     def period_length(self):
         return Constants.period_length
 
-    def initial_decision(self):
-        return 0.5
-
     def when_all_players_ready(self):
         super().when_all_players_ready()
         self.current_matrix = random.choice([0, 1])

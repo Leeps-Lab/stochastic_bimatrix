@@ -77,13 +77,12 @@
             running="{{ _isPeriodRunning }}">
         </otree-period>
         <otree-continuous-decision
-            component="stochastic-bimatrix"
             my-decision="{{ myDecision }}"
             other-decision="{{ otherDecision }}">
         </otree-continuous-decision>
         <otree-continuous-decision-bot
             id="bot"
-            component="stochastic-bimatrix"
+            initial-decision="[[ initialDecision ]]"
             my-decision="{{ myDecision }}"
             other-decision="{{ otherDecision }}">
         </otree-continuous-decision-bot>
@@ -216,6 +215,9 @@
             properties: {
                 payoffMatrices: Array,
                 transitionProbabilities: Array,
+                initialDecision: {
+                    type: Number,
+                },
                 myDecision: {
                     type: Number,
                     observer: '_handleDecisionChanged',
