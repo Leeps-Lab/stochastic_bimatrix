@@ -111,7 +111,10 @@ class Group(ContinuousDecisionGroup):
         # TODO: Integrate into the otree-redwood DiscreteEventEmitter API, because otherwise
         # someone will forget this and get very confused when the tick functions use stale data.
         self.refresh_from_db()
-        q1, q2 = list(self.group_decisions.values()) # decisions
+        if len(self.group_decisions) != 2:
+            return
+        q1 = self.group_decisions[self.get_player_by_id(1).participant.code]
+        q2 = self.group_decisions[self.get_player_by_id(2).participant.code]
         if random.uniform(0, 1) < self.pswitch(q1, q2):
             self.current_matrix = 1 - self.current_matrix
             self.save()
