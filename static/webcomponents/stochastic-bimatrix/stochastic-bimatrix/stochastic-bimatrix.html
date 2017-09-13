@@ -24,13 +24,13 @@
             styled-range {
                 transform: rotate(270deg) translateX(-100%);
                 transform-origin: 0 0px;
-                width: 315px;
+                width: 350px;
                 height: 50px;
             }
 
             .slider-container {
                 width: 50px;
-                height: 315px;
+                height: 350px;
                 position: relative;
                 top: 10px;
             }
@@ -50,10 +50,6 @@
                 margin: 0 15px 0 15px;
             }
 
-            hazard-iso {
-                margin: 0 10px 0 10px;
-            }
-
             #row1 {
                 margin-bottom: 50px;
             }
@@ -66,7 +62,7 @@
                 margin: 0 50px 0 50px;
             }
 
-            stochastic-heatmap {
+            stochastic-heatmap, hazard-iso {
                 margin: 0 15px 0 15px;
             }
 
@@ -91,43 +87,15 @@
             current-matrix="{{ currentMatrix }}">
         </matrix-transition>
 
-        <div class="layout vertical" style="margin: 20px">
+        <div class="layout vertical center" style="margin: 20px">
             <div id="row1" class="layout horizontal center">
-                <div id="hazard-heatmaps" class="layout vertical center">
-                    <div class="layout horizontal">
-                        <div class="layout vertical center">
-                            <span>Hazard A</span>
-                            <hazard-iso
-                                size="150"
-                                my-decision='[[ myDecision ]]'
-                                other-decision='[[ otherDecision ]]'
-                                probabilities='[[ probabilities_A ]]'
-                                color='[[ _hazardColorA ]]'
-                            ></hazard-iso>
-                        </div>
-                        <hazard-bar class="self-end" hazard-rate="[[ hazardRate ]]"></hazard-bar>
-                        <div class="layout vertical center">
-                            <span>Hazard B</span>
-                            <hazard-iso
-                                size="150"
-                                my-decision='[[ myDecision ]]'
-                                other-decision='[[ otherDecision ]]'
-                                probabilities='[[ probabilities_B ]]'
-                                color='[[ _hazardColorB ]]'
-                            ></hazard-iso>
-                        </div>
-                    </div>
-                    <span>
-                        More saturated areas have higher transition probability.
-                    </span>
-                </div>
                 <div id="payoff-graph" class="layout horizontal center">
                     <otree-thermometer
                         color="rainbow2"
-                        style="height: 185px; position: relative; top: 5px"
+                        style="height: 230px; position: relative; top: 10px"
                     ></otree-thermometer>
                     <payoff-graph
-                        style="height: 250px"
+                        style="width: 800px; height: 300px"
                         my-decision='[[ myDecision ]]'
                         other-decision='[[ otherDecision ]]'
                         my-payoffs='[[ _myCurrentPayoffs ]]'
@@ -139,7 +107,18 @@
                 </div>
             </div>
             <div id="row2" class="layout horizontal center">
-                <div class="layout vertical self-end">
+                <div class="layout vertical">
+                    <span>Hazard A</span>
+                    <div class="layout horizontal">
+                        <hazard-iso
+                            size="150"
+                            my-decision='[[ myDecision ]]'
+                            other-decision='[[ otherDecision ]]'
+                            probabilities='[[ probabilities_A ]]'
+                            color='[[ _hazardColorA ]]'
+                        ></hazard-iso>
+                        <hazard-bar class="self-end" hazard-rate="[[ hazardRate ]]"></hazard-bar>
+                    </div>
                     <span>Other Payoff A</span>
                     <stochastic-heatmap
                         class="other"
@@ -157,7 +136,7 @@
                     <span>Your Payoff A</span>
                     <stochastic-heatmap
                         class="you"
-                        size="300"
+                        size="350"
                         my-decision='[[ myDecision ]]'
                         other-decision='[[ otherDecision ]]'
                         payoffs='[[ myPayoffs_A ]]'
@@ -180,7 +159,7 @@
                     <span>Your Payoff B</span>
                     <stochastic-heatmap
                         class="you"
-                        size="300"
+                        size="350"
                         my-decision='[[ myDecision ]]'
                         other-decision='[[ otherDecision ]]'
                         payoffs='[[ myPayoffs_B ]]'
@@ -190,7 +169,18 @@
                         payoff-max='[[ _payoffMax ]]'
                     ></stochastic-heatmap>
                 </div>
-                <div class="layout vertical self-end">
+                <div class="layout vertical">
+                    <span>Hazard B</span>
+                    <div class="layout horizontal">
+                        <hazard-iso
+                            size="150"
+                            my-decision='[[ myDecision ]]'
+                            other-decision='[[ otherDecision ]]'
+                            probabilities='[[ probabilities_B ]]'
+                            color='[[ _hazardColorB ]]'
+                        ></hazard-iso>
+                        <hazard-bar class="self-end" hazard-rate="[[ hazardRate ]]"></hazard-bar>
+                    </div>
                     <span>Other Payoff B</span>
                     <stochastic-heatmap
                         class="other"
