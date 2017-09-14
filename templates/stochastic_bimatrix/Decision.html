@@ -33,10 +33,10 @@
 
 {% block content %}
     <stochastic-bimatrix
-        initial-decision='{{ initial_decision }}'
+        initial-decision='{{ player.initial_decision }}'
         payoff-matrices='{{ payoff_grid }}'
         transition-probabilities='{{ transition_probabilities }}'
-        period-length='{{ Constants.period_length }}'>
+        period-length='{{ player.group.period_length }}'>
     </stochastic-bimatrix>
 
 {% endblock %}
