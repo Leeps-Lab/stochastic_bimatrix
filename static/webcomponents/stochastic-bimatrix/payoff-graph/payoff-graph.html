@@ -1,0 +1,243 @@
+<link rel="import" href="/static/bower_components/polymer/polymer.html"/>
+
+<link rel="import" href="/static/otree-redwood/webcomponents/otree-period/otree-period.html">
+
+
+<dom-module id="payoff-graph">
+	<template>
+		<style>
+
+			:host {
+				display: block;
+			}
+
+		</style>
+
+        <otree-period
+	        on-period-start="_handlePeriodStart"
+	        on-period-end="_handlePeriodEnd">
+        </otree-period>
+		<div id="chart"></div>
+
+	</template>
+
+	<script>
+		Polymer({
+			is: 'payoff-graph',
+			properties: {
+				myDecision: {
+					type: Number,
+					observer: '_updateDataset'
+				},
+				otherDecision: {
+					type: Number,
+					observer: '_updateDataset'
+				},
+				myPayoffs: {
+                    type: Array,
+					observer: '_addTransitionBand'
+                },
+				otherPayoffs: {
+				    type: Array,
+					observer: '_addTransitionBand'
+                },
+				periodLength: Number,
+				payoffMin: {
+					type: Number,
+				},
+				payoffMax: {
+					type: Number,
+				},
+			},
+			ready() {
+				this.async(this._initHighchart.bind(this), 1);
+			},
+			_arrayItem(change, index) {
+				return change.base[index];
+			},
+			// helper method to return last element of array
+			_lastElem(arr) {
+				return arr[arr.length - 1];
+			},
+			// sets up payoff over time graph
+			_initHighchart() {
+				// readability is overrated
+				// just sums each set of payoffs and divides by 4
+				const myInitialPayoff = this.myPayoffs.reduce(
+					(a, b) => a + b, 0) / 4;
+				const otherInitialPayoff = this.otherPayoffs.reduce(
+					(a, b) => a + b, 0) / 4;
+
+				const minPayoff = this.payoffMin === undefined ?
+					Math.min(... this.myPayoffs.concat(this.otherPayoffs)) : this.payoffMin;
+				const maxPayoff = this.payoffMax === undefined ?
+					Math.max(... this.myPayoffs.concat(this.otherPayoffs)) : this.payoffMax;
+
+				// call highcharts setup function
+				this.graph_obj = Highcharts.chart({
+					chart: {
+						animation: false,
+						renderTo: this.$.chart,
+						enabled: false,
+						width: this.offsetWidth,
+						height: this.offsetHeight,
+
+					},
+					title: { text: 'Payoff vs. Time Chart' },
+					exporting: { enabled: false },
+					tooltip: { enabled: false },
+					legend: { enabled: false },
+					credits: { enabled: false },
+					xAxis: {
+						min: 0,
+						max: 1,
+						labels: { enabled: false },
+						plotLines: [{
+							value: 0,
+							width: 1,
+							color: '#ccd6eb',
+							zIndex: 100,
+						},
+						{
+							value: 1,
+							width: 1,
+							color: '#ccd6eb',
+							zIndex: 100,
+						}],
+					},
+					yAxis: {
+						title: { text: 'Payoff' },
+						min: minPayoff,
+						max: maxPayoff,
+						endOnTick: false,
+						tickInterval: (maxPayoff-minPayoff) / 4
+					},
+					plotOptions: {
+						line: {marker: {enabled: false}},
+						area: {marker: {enabled: false}},
+						series: {
+							states: {
+								hover: {
+									enabled: false,
+								}
+							}
+					   }
+					},
+					line: {
+						marker: {
+							enabled: false,
+							states: {
+								hover: { enabled: false },
+								select: { enabled: false }
+							}
+						}
+					},
+					series: [
+						{
+							name: 'Your Payoff',
+							type: "area",
+							data: [[0, myInitialPayoff], [Number.EPSILON, myInitialPayoff]],
+							step: "left"
+						},
+						{
+							name: 'Other Payoff',
+							type: "line",
+							data: [[0, otherInitialPayoff], [Number.EPSILON, otherInitialPayoff]],
+							step: "left"
+						}
+					],
+					legend: {
+						align: 'right',
+						verticalAlign: 'top',
+						floating: true,
+						y: 15,
+					},
+				});
+			},
+			_handlePeriodStart() {
+				this.start_time = performance.now();
+				this._animationID = window.requestAnimationFrame(this._updateGraph.bind(this));
+			},
+			_handlePeriodEnd() {
+				window.cancelAnimationFrame(this._animationID);
+			},
+			// updates current payoff value every 50 ms
+			_updateGraph(timestamp) {
+				// calculate x value for current time
+				const xval = (
+					(timestamp - this.start_time) /
+					(this.periodLength * 1000));
+				if (!isNaN(xval) && xval > 0) {
+
+					let dataset;
+					dataset = this.graph_obj.series[0];
+					if (xval > this._lastElem(dataset.data).x) {
+						this._lastElem(dataset.data).update({x: xval});
+					}
+
+					dataset = this.graph_obj.series[1];
+					if (xval > this._lastElem(dataset.data).x) {
+						this._lastElem(dataset.data).update({x: xval});
+					}
+
+					this.graph_obj.redraw();
+				}
+
+				// recursively call update
+				this._animationID = window.requestAnimationFrame(this._updateGraph.bind(this));
+			},
+			// is called everytime someone's decision changes to update this payoff graph
+			_updateDataset() {
+				// if graph hasn't been initialized, don't do anything
+				if (!this.graph_obj) return;
+
+				// calculate the payoff with current decision values
+				const my_point_payoff =
+					(this.myDecision * this.otherDecision * this.myPayoffs[0]) +
+					(this.myDecision * (1 - this.otherDecision) * this.myPayoffs[1]) +
+					((1 - this.myDecision) * this.otherDecision * this.myPayoffs[2]) +
+					((1 - this.myDecision) * (1 - this.otherDecision) * this.myPayoffs[3]);
+
+				const other_point_payoff =
+					(this.myDecision * this.otherDecision * this.otherPayoffs[0]) +
+					(this.myDecision * (1 - this.otherDecision) * this.otherPayoffs[1]) +
+					((1 - this.myDecision) * this.otherDecision * this.otherPayoffs[2]) +
+					((1 - this.myDecision) * (1 - this.otherDecision) * this.otherPayoffs[3]);
+
+				// calculate new decision's timestamp as a value between 0 and 1
+				const xval = (
+					(performance.now() - this.start_time) /
+					(this.periodLength * 1000));
+				if (isNaN(xval) || xval <= 0) return;
+
+				// add point for my payoff
+				let dataset = this.graph_obj.series[0];
+				this._lastElem(dataset.data).remove();
+				dataset.addPoint([xval, my_point_payoff]);
+				dataset.addPoint([xval+Number.EPSILON, my_point_payoff]);
+
+				// add point for other payoff
+				dataset = this.graph_obj.series[1]
+				this._lastElem(dataset.data).remove()
+				dataset.addPoint([xval, other_point_payoff]);
+				dataset.addPoint([xval+Number.EPSILON, other_point_payoff]);
+			},
+			// called every time a matrix transition occurs
+			_addTransitionBand() {
+				if (!this.graph_obj) return;
+
+				const xval = (
+					(performance.now() - this.start_time) /
+					(this.periodLength * 1000))
+				this.graph_obj.xAxis[0].addPlotBand({
+					value: xval,
+					width: 2,
+					color: 'red',
+					zIndex: 100,
+				});
+
+				this._updateDataset();
+			}
+		})
+	</script>
+</dom-module>

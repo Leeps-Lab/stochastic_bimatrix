@@ -9,7 +9,7 @@
 <link rel="import" href="/static/webcomponents/stochastic-bimatrix/stochastic-heatmap/stochastic-heatmap.html">
 <link rel="import" href="/static/webcomponents/stochastic-bimatrix/hazard-bar/hazard-bar.html">
 <link rel="import" href="/static/webcomponents/stochastic-bimatrix/hazard-iso/hazard-iso.html">
-<link rel="import" href="/static/webcomponents/stochastic-bimatrix/otree-thermometer/otree-thermometer.html">
+<link rel="import" href="/static/webcomponents/stochastic-bimatrix/heatmap-thermometer/heatmap-thermometer.html">
 <link rel="import" href="/static/webcomponents/stochastic-bimatrix/payoff-graph/payoff-graph.html">
 <link rel="import" href="/static/webcomponents/stochastic-bimatrix/matrix-transition/matrix-transition.html">
 <link rel="import" href="/static/webcomponents/stochastic-bimatrix/styled-range/styled-range.html">
@@ -89,10 +89,10 @@
         <div class="layout vertical center" style="margin: 20px">
             <div id="row1" class="layout horizontal center">
                 <div id="payoff-graph" class="layout horizontal center">
-                    <otree-thermometer
+                    <heatmap-thermometer
                         color="rainbow2"
                         style="height: 230px; position: relative; top: 10px"
-                    ></otree-thermometer>
+                    ></heatmap-thermometer>
                     <payoff-graph
                         style="width: 800px; height: 300px"
                         my-decision='[[ myDecision ]]'

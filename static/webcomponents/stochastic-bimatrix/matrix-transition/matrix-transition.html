@@ -1,0 +1,38 @@
+<link
+	rel="import"
+	href="/static/bower_components/polymer/polymer.html" />
+
+<link
+	rel="import" 
+	href="/static/otree-redwood/webcomponents/otree-constants/otree-constants.html">
+<link
+    rel="import"
+    href="/static/otree-redwood/webcomponents/otree-channel/otree-channel.html" />
+
+
+<dom-module id="matrix-transition">
+
+	<template>
+    	<otree-constants id="constants"></otree-constants>
+    	<otree-channel
+    		channel="current_matrix"
+    		on-event="_handleCurrentMatrixEvent">
+	    </otree-channel>
+	</template>
+
+	<script>
+		Polymer({
+			is: 'matrix-transition',
+			properties: {
+				currentMatrix: {
+                    type: Number,
+                    notify: true,
+                },
+			},
+			_handleCurrentMatrixEvent(event) {
+				this.currentMatrix = event.detail.payload;
+			},
+		});
+	</script>
+
+</dom-module>

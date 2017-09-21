@@ -1,0 +1,67 @@
+<link
+	rel="import"
+	href="/static/bower_components/polymer/polymer.html" />
+
+<link
+	rel="import" 
+	href="/static/otree-redwood/webcomponents/otree-constants/otree-constants.html">
+<link
+    rel="import"
+    href="/static/otree-redwood/webcomponents/otree-channel/otree-channel.html" />
+
+<dom-module id="hazard-bar">
+	<template>
+        <style>
+			canvas {
+				border: 1px black solid;
+				width: 20px;
+				height: 150px;
+			}
+		</style>
+
+		<div>
+            <canvas id="hazard_display"></canvas>
+        </div>
+        <otree-constants id="constants"></otree-constants>
+	</template>
+    
+	<script>
+        Polymer({
+            is: 'hazard-bar',
+            properties: {
+                hazardRate: {
+                    type: Number,
+                    value: 0.5,
+                    observer: 'make_hazard_bar',
+                },
+            },
+            attached() {
+                this.canvas = this.$.hazard_display;
+            },
+            make_hazard_bar() {
+                // console.log('hazardrate='+this.hazardRate);
+                if (!this.hazardRate || !this.canvas)
+                    return;
+                
+                const w = this.canvas.width;
+                const h = this.canvas.height;
+                const ctx = this.canvas.getContext('2d');
+                // create empty imageData object
+				const imageData = ctx.createImageData(w, h);
+				const data = imageData.data;
+                for (let row = parseInt(h * (1-this.hazardRate)); row < h; row++) {
+					for (let col = 0; col < w; col++) {
+						const index = (row * w * 4) + (col * 4);
+						data[index] = 255;
+						data[index + 1] = 0;
+						data[index + 2] = 0;
+						// set alpha channel to fully opaque
+						data[index + 3] = 191;
+					}
+				}
+
+				ctx.putImageData(imageData, 0, 0);
+            },
+        })
+    </script>
+</dom-module>

@@ -1,0 +1,59 @@
+<link rel="import" href="/static/bower_components/polymer/polymer.html">
+
+
+<dom-module id="styled-range">
+
+    <template>
+		<link rel="stylesheet" href="range.css">
+
+		<style>
+			:host {
+				display: flex;
+				flex-direction: row;
+				width: 100%;
+				height: 100%;
+			}
+		</style>
+
+		<input
+            id="input"
+		    type="range"
+		    min="[[ min ]]"
+		    max="[[ max ]]"
+		    step="[[ step ]]"
+		    disabled$="[[ disabled ]]"
+            on-change="_inputValueChanged">
+    </template>
+
+    <script>
+        Polymer({
+            is: 'styled-range',
+            properties: {
+            	disabled: {
+            		type: Boolean,
+            	},
+            	min: {
+            		type: Number,
+            	},
+            	max: {
+            		type: Number,
+            	},
+            	step: {
+            		type: Number,
+            	},
+            	value: {
+                    type: Number,
+            		notify: true,
+                    observer: '_parentValueChanged',
+            	},
+            },
+            _inputValueChanged(event) {
+                this.value = parseFloat(event.target.value);
+            },
+            _parentValueChanged(newValue, oldValue) {
+                this.$.input.value = newValue;
+            },
+        })
+    </script>
+
+</dom-module>
