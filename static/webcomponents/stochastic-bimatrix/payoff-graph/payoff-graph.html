@@ -52,9 +52,6 @@
 			ready() {
 				this.async(this._initHighchart.bind(this), 1);
 			},
-			_arrayItem(change, index) {
-				return change.base[index];
-			},
 			// helper method to return last element of array
 			_lastElem(arr) {
 				return arr[arr.length - 1];
@@ -83,7 +80,7 @@
 						height: this.offsetHeight,
 
 					},
-					title: { text: 'Payoff vs. Time Chart' },
+					title: { text: 'Payoff vs. Time' },
 					exporting: { enabled: false },
 					tooltip: { enabled: false },
 					legend: { enabled: false },

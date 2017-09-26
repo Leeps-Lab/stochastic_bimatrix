@@ -2,8 +2,8 @@
 <link rel="import" href="/static/bower_components/iron-flex-layout/iron-flex-layout-classes.html">
 
 <link rel="import" href="/static/otree-redwood/webcomponents/otree-constants/otree-constants.html">
-<link rel="import" href="/static/otree-redwood/webcomponents/otree-continuous-decision/otree-continuous-decision.html">
-<link rel="import" href="/static/otree-redwood/webcomponents/otree-continuous-decision-bot/otree-continuous-decision-bot.html">
+<link rel="import" href="/static/otree-redwood/webcomponents/otree-decision/otree-decision.html">
+<link rel="import" href="/static/otree-redwood/webcomponents/otree-decision-bot/otree-decision-bot.html">
 <link rel="import" href="/static/otree-redwood/webcomponents/otree-period/otree-period.html">
 
 <link rel="import" href="/static/webcomponents/stochastic-bimatrix/stochastic-heatmap/stochastic-heatmap.html">
@@ -72,16 +72,16 @@
         <otree-period
             running="{{ _isPeriodRunning }}">
         </otree-period>
-        <otree-continuous-decision
+        <otree-decision
             initial-decision="{{ initialDecision }}"
             my-decision="{{ myDecision }}"
             other-decision="{{ otherDecision }}">
-        </otree-continuous-decision>
-        <otree-continuous-decision-bot
+        </otree-decision>
+        <otree-decision-bot
             id="bot"
             my-decision="{{ myDecision }}"
             other-decision="{{ otherDecision }}">
-        </otree-continuous-decision-bot>
+        </otree-decision-bot>
         <matrix-transition
             current-matrix="{{ currentMatrix }}">
         </matrix-transition>
