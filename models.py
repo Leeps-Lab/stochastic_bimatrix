@@ -8,7 +8,7 @@ from otree.db import models
 from otree.constants import BaseConstants
 from otree.common import Currency as c, currency_range
 from otree.models import BaseSubsession, BasePlayer
-from otree_redwood.models import Event, ContinuousDecisionGroup
+from otree_redwood.models import Event, DecisionGroup
 from otree_redwood.utils import DiscreteEventEmitter
 
 doc = """
@@ -80,7 +80,7 @@ class Subsession(BaseSubsession):
         self.group_randomly()
 
 
-class Group(ContinuousDecisionGroup):
+class Group(DecisionGroup):
 
     current_matrix = models.PositiveIntegerField()
     
