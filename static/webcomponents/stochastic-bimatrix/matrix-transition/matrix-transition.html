@@ -7,17 +7,17 @@
 	href="/static/otree-redwood/webcomponents/otree-constants/otree-constants.html">
 <link
     rel="import"
-    href="/static/otree-redwood/webcomponents/otree-channel/otree-channel.html" />
+    href="/static/otree-redwood/webcomponents/redwood-channel/redwood-channel.html" />
 
 
 <dom-module id="matrix-transition">
 
 	<template>
     	<otree-constants id="constants"></otree-constants>
-    	<otree-channel
+    	<redwood-channel
     		channel="current_matrix"
     		on-event="_handleCurrentMatrixEvent">
-	    </otree-channel>
+	    </redwood-channel>
 	</template>
 
 	<script>

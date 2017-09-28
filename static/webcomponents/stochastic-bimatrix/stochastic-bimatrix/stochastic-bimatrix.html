@@ -2,9 +2,9 @@
 <link rel="import" href="/static/bower_components/iron-flex-layout/iron-flex-layout-classes.html">
 
 <link rel="import" href="/static/otree-redwood/webcomponents/otree-constants/otree-constants.html">
-<link rel="import" href="/static/otree-redwood/webcomponents/otree-decision/otree-decision.html">
-<link rel="import" href="/static/otree-redwood/webcomponents/otree-decision-bot/otree-decision-bot.html">
-<link rel="import" href="/static/otree-redwood/webcomponents/otree-period/otree-period.html">
+<link rel="import" href="/static/otree-redwood/webcomponents/redwood-decision/redwood-decision.html">
+<link rel="import" href="/static/otree-redwood/webcomponents/redwood-decision-bot/redwood-decision-bot.html">
+<link rel="import" href="/static/otree-redwood/webcomponents/redwood-period/redwood-period.html">
 
 <link rel="import" href="/static/webcomponents/stochastic-bimatrix/stochastic-heatmap/stochastic-heatmap.html">
 <link rel="import" href="/static/webcomponents/stochastic-bimatrix/hazard-bar/hazard-bar.html">
@@ -69,19 +69,19 @@
         </style>
 
         <otree-constants id="constants"></otree-constants>
-        <otree-period
+        <redwood-period
             running="{{ _isPeriodRunning }}">
-        </otree-period>
-        <otree-decision
+        </redwood-period>
+        <redwood-decision
             initial-decision="{{ initialDecision }}"
             my-decision="{{ myDecision }}"
             other-decision="{{ otherDecision }}">
-        </otree-decision>
-        <otree-decision-bot
+        </redwood-decision>
+        <redwood-decision-bot
             id="bot"
             my-decision="{{ myDecision }}"
             other-decision="{{ otherDecision }}">
-        </otree-decision-bot>
+        </redwood-decision-bot>
         <matrix-transition
             current-matrix="{{ currentMatrix }}">
         </matrix-transition>
@@ -227,7 +227,7 @@
                 _payoffMax: {
                     computed: '_computePayoffMax(payoffMatrices.*)',
                 },
-                // set by otree-period
+                // set by redwood-period
                 _isPeriodRunning: {
                     type: Boolean
                 },
