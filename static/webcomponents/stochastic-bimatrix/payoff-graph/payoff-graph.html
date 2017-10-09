@@ -48,6 +48,18 @@
 				payoffMax: {
 					type: Number,
 				},
+				myPayoffSeries: {
+					type: Array,
+					value: () => {
+						return [[0, 0], [Number.EPSILON, 0]];
+					}
+				},
+				otherPayoffSeries: {
+					type: Array,
+					value: () => {
+						return [[0, 0], [Number.EPSILON, 0]];
+					}
+				}
 			},
 			ready() {
 				this.async(this._initHighchart.bind(this), 1);
@@ -58,13 +70,6 @@
 			},
 			// sets up payoff over time graph
 			_initHighchart() {
-				// readability is overrated
-				// just sums each set of payoffs and divides by 4
-				const myInitialPayoff = this.myPayoffs.reduce(
-					(a, b) => a + b, 0) / 4;
-				const otherInitialPayoff = this.otherPayoffs.reduce(
-					(a, b) => a + b, 0) / 4;
-
 				const minPayoff = this.payoffMin === undefined ?
 					Math.min(... this.myPayoffs.concat(this.otherPayoffs)) : this.payoffMin;
 				const maxPayoff = this.payoffMax === undefined ?
@@ -133,13 +138,13 @@
 						{
 							name: 'Your Payoff',
 							type: "area",
-							data: [[0, myInitialPayoff], [Number.EPSILON, myInitialPayoff]],
+							data: this.myPayoffSeries,
 							step: "left"
 						},
 						{
 							name: 'Other Payoff',
 							type: "line",
-							data: [[0, otherInitialPayoff], [Number.EPSILON, otherInitialPayoff]],
+							data: this.otherPayoffSeries,
 							step: "left"
 						}
 					],
