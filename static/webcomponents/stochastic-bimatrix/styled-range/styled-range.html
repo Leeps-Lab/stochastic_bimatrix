@@ -40,16 +40,50 @@
             	},
             	step: {
             		type: Number,
-            	},
+				},
+				// in seconds to move slider from 0 to 1
+				rateLimit: {
+					type: Number,
+				},
             	value: {
                     type: Number,
             		notify: true,
-                    observer: '_parentValueChanged',
-            	},
+                    //observer: '_parentValueChanged',
+				},
+				_sliderValue: {
+					type: Number,
+				},
+				_lastMovedTime: {
+					type: Number,
+				},
+				_timeoutID: {
+					type: Number,
+				},
             },
             _inputValueChanged(event) {
-                this.value = parseFloat(event.target.value);
-            },
+				this._sliderValue = parseFloat(event.target.value);
+				if (this.rateLimit > 0) {
+					window.clearTimeout(this._timeoutID);
+					this._lastMovedTime = performance.now();
+					this._timeoutID = window.setTimeout(this._tick.bind(this), 50);
+				}
+				else {
+					this.value = this._sliderValue;
+				}
+			},
+			_tick() {
+				let dist = (performance.now() - this._lastMovedTime) / (this.rateLimit * 1000);
+				this._lastMovedTime = performance.now();
+				if (this._sliderValue < this.value) dist *= -1;
+				this.value += dist;
+				if ((dist < 0 && this.value <= this._sliderValue) || 
+				    (dist > 0 && this.value >= this._sliderValue)) {
+					this.value = this._sliderValue;
+				}
+				else {
+					this._timeoutID = window.setTimeout(this._tick.bind(this), 50);
+				}
+			},
             _parentValueChanged(newValue, oldValue) {
                 this.$.input.value = newValue;
             },
