@@ -141,7 +141,7 @@ class Group(DecisionGroup):
     def pswitch(self, q1, q2):
         p11, p12, p21, p22 = [
             pij[self.current_matrix]
-            for pij in self.subsession.transition_probabilities
+            for pij in self.subsession.transition_probabilities()
         ] # transition probabilities
         # probability of a switch in 2 seconds = 1/2
         # solved by P(switch in t) = (1-p)^10t = 1/2
@@ -200,7 +200,7 @@ class Player(BasePlayer):
         self.payoff = self.get_payoff(
             period_start, period_end,
             useful_events_over_time,
-            self.subsession.payoff_grid
+            self.subsession.payoff_grid()
         )
 
     def get_payoff(self, period_start, period_end, events_over_time, payoff_grids):
