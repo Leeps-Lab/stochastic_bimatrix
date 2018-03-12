@@ -65,7 +65,7 @@
 				if (this.rateLimit > 0) {
 					window.clearTimeout(this._timeoutID);
 					this._lastMovedTime = performance.now();
-					this._timeoutID = window.setTimeout(this._tick.bind(this), 50);
+					this._timeoutID = window.setTimeout(this._tick.bind(this), 200);
 				}
 				else {
 					this.value = this._sliderValue;
@@ -75,14 +75,15 @@
 				let dist = (performance.now() - this._lastMovedTime) / (this.rateLimit * 1000);
 				this._lastMovedTime = performance.now();
 				if (this._sliderValue < this.value) dist *= -1;
-				this.value += dist;
-				if ((dist < 0 && this.value <= this._sliderValue) || 
-				    (dist > 0 && this.value >= this._sliderValue)) {
-					this.value = this._sliderValue;
+				let new_value = this.value + dist;
+				if ((dist < 0 && new_value <= this._sliderValue) || 
+				    (dist > 0 && new_value >= this._sliderValue)) {
+					new_value = this._sliderValue;
 				}
 				else {
-					this._timeoutID = window.setTimeout(this._tick.bind(this), 50);
+					this._timeoutID = window.setTimeout(this._tick.bind(this), 200);
 				}
+				this.value = new_value;
 			},
             _parentValueChanged(newValue, oldValue) {
                 this.$.input.value = newValue;
