@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import division
+import csv
 import random
 
 from django.contrib.contenttypes.models import ContentType
@@ -15,7 +16,7 @@ doc = """
 Two-by-two game with stochastic transitions between payoff matrices.
 """
 
-
+"""
 class UndefinedTreatmentError(ValueError):
     pass
 
@@ -25,17 +26,45 @@ def treatment(session):
         return Constants.treatments[session.config['treatment']]
     else:
         raise UndefinedTreatmentError('no treatment attribute in settings.py')
-
+"""
 
 class Constants(BaseConstants):
     name_in_url = 'stochastic_bimatrix'
     players_per_group = 2
-    num_rounds = 10
+    num_rounds = 100
 
     base_points = 0
 
-    period_length = 120
+    # period_length = 120
 
+def parse_config(config_file):
+    with open('stochastic_bimatrix/configs/' + config_file) as f:
+        rows = list(csv.DictReader(f))
+
+    rounds = []
+    for row in rows:
+        rounds.append({
+            'shuffle_role': True if row['shuffle_role'] == 'TRUE' else False,
+            'period_length': int(row['period_length']),
+            'payoff_grid': [
+                [
+                    [int(row['A_payoff1Aa']), int(row['A_payoff2Aa'])], [int(row['A_payoff1Ab']), int(row['A_payoff2Ab'])],
+                    [int(row['A_payoff1Ba']), int(row['A_payoff2Ba'])], [int(row['A_payoff1Bb']), int(row['A_payoff2Bb'])]
+                ],
+                [
+                    [int(row['B_payoff1Aa']), int(row['B_payoff2Aa'])], [int(row['B_payoff1Ab']), int(row['B_payoff2Ab'])],
+                    [int(row['B_payoff1Ba']), int(row['B_payoff2Ba'])], [int(row['B_payoff1Bb']), int(row['B_payoff2Bb'])]
+                ]
+            ],
+            'transition_probabilities':
+                [
+                    [int(row['transition1Aa']), int(row['transition2Aa'])], [int(row['transition1Ab']), int(row['transition2Ab'])],
+                    [int(row['transition1Ba']), int(row['transition2Ba'])], [int(row['transition1Bb']), int(row['transition2Bb'])]
+                ]
+        })
+    return rounds
+
+"""
     treatments = {
         'A': {
             'payoff_grid': [
@@ -71,21 +100,36 @@ class Constants(BaseConstants):
                     [   0,   0 ], [ 0.2, 0.8 ]
                 ]
         },
-    }
+    }"""
 
 
 class Subsession(BaseSubsession):
-    
+
     def before_session_starts(self):
-        self.group_randomly()
+        config = parse_config(self.session.config['config_file'])
+        if self.round_number > len(config):
+            self.group_randomly()
+        elif config[self.round_number-1]['shuffle_role']:
+            self.group_randomly()
+        else:
+            self.group_randomly(fixed_id_in_group=True)
+
+    def payoff_grid(self):
+        return parse_config(self.session.config['config_file'])[self.round_number-1]['payoff_grid']
+
+    def transition_probabilities(self):
+        return parse_config(self.session.config['config_file'])[self.round_number-1]['transition_probabilities']
 
 
 class Group(DecisionGroup):
 
     current_matrix = models.PositiveIntegerField()
-    
+
     def period_length(self):
-        return Constants.period_length
+        return parse_config(self.session.config['config_file'])[self.round_number-1]['period_length']
+
+    def num_rounds(self):
+        return len(parse_config(self.session.config['config_file']))
 
     def when_all_players_ready(self):
         super().when_all_players_ready()
@@ -97,7 +141,7 @@ class Group(DecisionGroup):
     def pswitch(self, q1, q2):
         p11, p12, p21, p22 = [
             pij[self.current_matrix]
-            for pij in treatment(self.session)['transition_probabilities']
+            for pij in self.subsession.transition_probabilities
         ] # transition probabilities
         # probability of a switch in 2 seconds = 1/2
         # solved by P(switch in t) = (1-p)^10t = 1/2
@@ -156,7 +200,7 @@ class Player(BasePlayer):
         self.payoff = self.get_payoff(
             period_start, period_end,
             useful_events_over_time,
-            Constants.treatments[self.session.config['treatment']]['payoff_grid']
+            self.subsession.payoff_grid
         )
 
     def get_payoff(self, period_start, period_end, events_over_time, payoff_grids):
@@ -171,7 +215,7 @@ class Player(BasePlayer):
         if self.id_in_group == 1:
             row_player = self.participant
         else:
-            row_player = self.get_others_in_group()[0].participant 
+            row_player = self.get_others_in_group()[0].participant
 
         for i, change in enumerate(events_over_time):
             if change.channel == 'current_matrix':
@@ -195,4 +239,4 @@ class Player(BasePlayer):
 
             payoff += (next_change_time - change.timestamp).total_seconds() * flow_payoff
 
-        return payoff / period_duration.total_seconds() 
+        return payoff / period_duration.total_seconds()

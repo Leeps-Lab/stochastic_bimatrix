@@ -1,0 +1,2 @@
+round,shuffle_role,period_length,A_payoff1Aa,A_payoff1Ab,A_payoff1Ba,A_payoff1Bb,A_payoff2Aa,A_payoff2Ab,A_payoff2Ba,A_payoff2Bb,B_payoff1Aa,B_payoff1Ab,B_payoff1Ba,B_payoff1Bb,B_payoff2Aa,B_payoff2Ab,B_payoff2Ba,B_payoff2Bb,transition1Aa,transition1Ab,transition1Ba,transition1Bb,transition2Aa,transition2Ab,transition2Ba,transition2Bb
+1,TRUE,60,20,0,0,20,0,20,20,0,200,0,0,200,0,200,50,150,1,0,0,0,0,0,0,1
