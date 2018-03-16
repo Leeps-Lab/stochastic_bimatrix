@@ -31,6 +31,7 @@
             properties: {
             	disabled: {
             		type: Boolean,
+					observer: '_disabledChanged'
             	},
             	min: {
             		type: Number,
@@ -44,6 +45,7 @@
 				// in seconds to move slider from 0 to 1
 				rateLimit: {
 					type: Number,
+					value: 0,
 				},
             	value: {
                     type: Number,
@@ -59,7 +61,7 @@
 				_timeoutID: {
 					type: Number,
 				},
-            },
+			},
             _inputValueChanged(event) {
 				this._sliderValue = parseFloat(event.target.value);
 				if (this.rateLimit > 0) {
@@ -88,6 +90,9 @@
             _parentValueChanged(newValue, oldValue) {
                 this.$.input.value = newValue;
             },
+			_disabledChanged(newValue, oldValue) {
+				if (newValue === true) window.clearTimeout(this._timeoutID);
+			},
         })
     </script>
 
