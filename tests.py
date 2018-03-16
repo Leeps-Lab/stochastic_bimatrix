@@ -12,6 +12,9 @@ from . import views
 class PlayerBot(Bot):
 
     def play_round(self):
+        if (self.player.round_number > self.group.num_rounds()):
+            return
+
         if self.player.round_number == 1:
             yield views.Introduction
         '''
