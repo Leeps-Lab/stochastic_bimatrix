@@ -53,8 +53,8 @@ def get_config_columns(group):
     role_shuffle = config[group.round_number - 1]['shuffle_role']
     return payoffs + [role_shuffle]
 
-def get_output_table(events):
-    header = [
+def get_output_table_header():
+    return [
         'session_code',
         'subsession_id',
         'id_in_subsession',
@@ -83,8 +83,10 @@ def get_output_table(events):
         'B_payoff2Bb',
         'role_shuffle',
     ]
+
+def get_output_table(events):
     if not events:
-        return [], []
+        return []
     rows = []
     minT = min(e.timestamp for e in events)
     maxT = max(e.timestamp for e in events)
@@ -121,7 +123,7 @@ def get_output_table(events):
             group.pswitch(p1_decision,p2_decision),
             current_matrix,
         ] + config_columns)
-    return header, rows
+    return rows
 """
     for tick in range((maxT - minT).seconds):
         currT = minT + timedelta(seconds=tick)
