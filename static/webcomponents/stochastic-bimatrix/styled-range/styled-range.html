@@ -22,7 +22,8 @@
 		    max="[[ max ]]"
 		    step="[[ step ]]"
 		    disabled$="[[ disabled ]]"
-            on-change="_inputValueChanged">
+			on-change="_inputValueChanged"
+			value="[[ initialValue ]]">
     </template>
 
     <script>
@@ -51,6 +52,9 @@
                     type: Number,
             		notify: true,
                     //observer: '_parentValueChanged',
+				},
+				initialValue: {
+					type: Number,
 				},
 				_sliderValue: {
 					type: Number,
